@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}User Management — CampusConnect Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small mb-1">
+          <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+          <li class="breadcrumb-item active">Users</li>
+        </ol>
+      </nav>
+      <h2 class="fw-bold mb-0">User Governance &amp; Access Control</h2>
+      <p class="text-muted small mb-0">Manage student, staff, and faculty campus credentials and account statuses</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin.password_reset') }}" class="btn btn-warning btn-sm fw-semibold shadow-sm">
+        <i class="bi bi-key-fill me-1"></i> Password Reset Portal
+      </a>
+      <a href="{{ url_for('admin.students') }}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-mortarboard me-1"></i> Student Directory
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter & Search Bar -->
+  <div class="card p-3 shadow-sm border-0 bg-white rounded-3 mb-4">
+    <form method="GET" action="{{ url_for('admin.users') }}" class="row g-2 align-items-center">
+      <div class="col-lg-5 col-md-6">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" name="q" value="{{ search }}" class="form-control border-start-0 ps-0" placeholder="Search by name, college email, or campus ID...">
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-3">
+        <select name="role" class="form-select">
+          <option value="">All Roles</option>
+          {% for r in roles %}
+            <option value="{{ r.name }}" {% if role_filter == r.name %}selected{% endif %}>{{ r.name|capitalize }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-lg-2 col-md-3">
+        <select name="status" class="form-select">
+          <option value="">All Statuses</option>
+          <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+          <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Deactivated Only</option>
+          <option value="pending_approval" {% if status_filter == 'pending_approval' %}selected{% endif %}>Pending Staff Approval</option>
+        </select>
+      </div>
+      <div class="col-lg-2 col-md-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary-cc w-100">Filter</button>
+        {% if search or role_filter or status_filter %}
+          <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Users Table -->
+  {% if users %}
+    <div class="card shadow-sm border-0 bg-white rounded-4 overflow-hidden mb-4">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light small text-uppercase text-muted">
+            <tr>
+              <th scope="col" class="ps-4">User</th>
+              <th scope="col">Campus ID</th>
+              <th scope="col">Department</th>
+              <th scope="col">Role</th>
+              <th scope="col">Status</th>
+              <th scope="col" class="text-end pe-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+              <tr>
+                <td class="ps-4">
+                  <div class="fw-bold text-dark">{{ u.full_name }}</div>
+                  <div class="small text-muted">{{ u.email }} • {{ u.phone }}</div>
+                </td>
+                <td>
+                  <span class="badge bg-light text-dark border font-monospace">{{ u.campus_id }}</span>
+                </td>
+                <td>
+                  <span class="small text-muted">{{ u.department.name if u.department else 'N/A' }}</span>
+                  <div class="small text-muted">{{ u.designation_or_year }}</div>
+                </td>
+                <td>
+                  <span class="badge {% if u.is_admin %}bg-dark text-white{% elif u.is_staff %}bg-success-subtle text-success border border-success-subtle{% else %}bg-primary-subtle text-primary border border-primary-subtle{% endif %}">
+                    {{ u.role.name|capitalize if u.role else 'None' }}
+                  </span>
+                </td>
+                <td>
+                  {% if not u.is_approved %}
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending Staff Approval</span>
+                  {% elif u.is_active %}
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+                  {% else %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Deactivated</span>
+                  {% endif %}
+                </td>
+                <td class="text-end pe-4">
+                  <div class="btn-group btn-group-sm">
+                    <!-- Approve Staff Button -->
+                    {% if not u.is_approved %}
+                      <form action="{{ url_for('admin.approve_staff', user_id=u.id) }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-success" title="Approve Staff Account">
+                          <i class="bi bi-check2-circle"></i> Approve
+                        </button>
+                      </form>
+                    {% endif %}
+
+                    <!-- Toggle Status (Activate / Deactivate) -->
+                    {% if u.id != current_user.id %}
+                      <form action="{{ url_for('admin.toggle_user_status', user_id=u.id) }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        {% if u.is_active %}
+                          <button type="submit" class="btn btn-outline-danger" title="Deactivate user" data-confirm="Are you sure you want to deactivate {{ u.full_name }}?">
+                            <i class="bi bi-person-x"></i> Deactivate
+                          </button>
+                        {% else %}
+                          <button type="submit" class="btn btn-outline-success" title="Activate user">
+                            <i class="bi bi-person-check"></i> Activate
+                          </button>
+                        {% endif %}
+                      </form>
+
+                      <!-- Change Role Dropdown Trigger -->
+                      <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#roleModal{{ u.id }}" title="Change User Role">
+                        <i class="bi bi-gear"></i> Role
+                      </button>
+
+                      <!-- Password Reset Portal shortcut -->
+                      <a href="{{ url_for('admin.password_reset', college_id=u.campus_id) }}" class="btn btn-outline-warning text-dark" title="Reset Password via College ID">
+                        <i class="bi bi-key"></i> Reset
+                      </a>
+                    {% endif %}
+                  </div>
+
+                  <!-- Role Change Modal for this user -->
+                  {% if u.id != current_user.id %}
+                    <div class="modal fade text-start" id="roleModal{{ u.id }}" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                          <form action="{{ url_for('admin.change_user_role', user_id=u.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="modal-header">
+                              <h6 class="modal-title fw-bold">Change Role for {{ u.full_name.split()[0] }}</h6>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                              <label class="form-label small fw-semibold text-muted">Select Role</label>
+                              <select name="role_id" class="form-select">
+                                {% for r in roles %}
+                                  <option value="{{ r.id }}" {% if u.role_id == r.id %}selected{% endif %}>{{ r.name|capitalize }}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                              <button type="submit" class="btn btn-primary-cc btn-sm">Update Role</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+      <nav aria-label="Page navigation" class="d-flex justify-content-center">
+        <ul class="pagination">
+          <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.users', page=pagination.prev_num, q=search, role=role_filter, status=status_filter) }}">Previous</a>
+          </li>
+          {% for p in pagination.iter_pages() %}
+            {% if p %}
+              <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('admin.users', page=p, q=search, role=role_filter, status=status_filter) }}">{{ p }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+          <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.users', page=pagination.next_num, q=search, role=role_filter, status=status_filter) }}">Next</a>
+          </li>
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <div class="cc-empty-state my-4">
+      <i class="bi bi-people cc-empty-icon"></i>
+      <h4 class="fw-bold">No Users Found</h4>
+      <p class="text-muted small">No campus accounts matched your search filters.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

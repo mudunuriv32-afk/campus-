@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Internal Server Error (500) — CampusConnect{% endblock %}
+{% block content %}
+<div class="container py-5 text-center">
+  <div class="py-5">
+    <div class="display-1 fw-bold text-danger mb-3"><i class="bi bi-gear-wide-connected"></i> 500</div>
+    <h2 class="fw-bold mb-3">Server Encountered an Error</h2>
+    <p class="text-muted lead mx-auto mb-4" style="max-width: 500px;">
+      An unexpected internal condition occurred. Our technical staff has been notified and any uncommitted database changes were safely rolled back.
+    </p>
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary-cc">
+      <i class="bi bi-house-door me-1"></i> Return Home
+    </a>
+  </div>
+</div>
+{% endblock %}

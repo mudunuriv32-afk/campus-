@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Sign In — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card p-4 p-md-5 shadow-lg border-0 rounded-4 bg-white">
+        <div class="text-center mb-4">
+          <div class="cc-brand-badge d-inline-block mb-3 p-3 fs-3">
+            <i class="bi bi-shield-lock"></i>
+          </div>
+          <h3 class="fw-bold text-navy-primary">Welcome Back</h3>
+          <p class="text-muted small">Sign in to your CampusConnect college portal account</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+          {{ form.hidden_tag() }}
+          <!-- Anti-Bot Honeypot Trap Field -->
+          <input type="text" name="cc_website_hp" class="cc-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+          <div class="mb-3">
+            <label for="email" class="form-label small fw-semibold text-muted">College ID / College Email</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person-badge"></i></span>
+              {{ form.email(class="form-control border-start-0 ps-0" + (" is-invalid" if form.email.errors else ""), placeholder="e.g. STU-3001 or student@campusconnect.edu") }}
+            </div>
+            {% for error in form.email.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+            <div class="form-text small text-muted" style="font-size: 0.75rem;">Use either your official Student/Employee ID or registered institutional email to sign in.</div>
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <label for="password" class="form-label small fw-semibold text-muted">{{ form.password.label }}</label>
+              <a href="{{ url_for('auth.forgot_password') }}" class="small text-primary text-decoration-none">Forgot password?</a>
+            </div>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-key"></i></span>
+              {{ form.password(class="form-control border-start-0 border-end-0 ps-0" + (" is-invalid" if form.password.errors else ""), placeholder="••••••••", id="password") }}
+              <button class="btn btn-outline-secondary border-start-0 btn-password-toggle" type="button" data-target="password" title="Toggle password visibility" aria-label="Toggle password visibility">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            {% for error in form.password.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-check mb-4">
+            {{ form.remember_me(class="form-check-input") }}
+            <label class="form-check-label small text-muted" for="remember_me">
+              Keep me signed in on this device
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary-cc w-100 py-2 fs-6 shadow-sm">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+          </button>
+        </form>
+
+        <hr class="my-4">
+
+        <div class="text-center small text-muted">
+          New to CampusConnect?<br>
+          <div class="d-flex justify-content-center gap-3 mt-2">
+            <a href="{{ url_for('auth.register_student') }}" class="fw-semibold text-primary text-decoration-none">
+              <i class="bi bi-mortarboard me-1"></i> Student Sign Up
+            </a>
+            <span class="text-muted">•</span>
+            <a href="{{ url_for('auth.register_staff') }}" class="fw-semibold text-success text-decoration-none">
+              <i class="bi bi-person-badge me-1"></i> Staff Sign Up
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

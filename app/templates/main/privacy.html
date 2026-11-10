@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Privacy Policy</li>
+        </ol>
+      </nav>
+
+      <h1 class="fw-bold mb-3">CampusConnect Privacy Policy</h1>
+      <p class="text-muted small mb-4">Last Updated: Academic Term 2026</p>
+
+      <div class="card p-4 shadow-sm border-0 bg-white rounded-4 leading-relaxed">
+        <h5 class="fw-bold text-primary">1. Information We Collect</h5>
+        <p class="small text-muted">
+          CampusConnect collects essential institutional profile details during registration, including your full name, official college email address, student or employee identification number, departmental affiliation, and telephone number. When submitting property reports, description texts, campus locations, timestamps, and optional photographs are recorded.
+        </p>
+
+        <h5 class="fw-bold text-primary mt-3">2. How Personal Data Is Protected</h5>
+        <p class="small text-muted">
+          Your personal telephone number and student identification roll number are <strong>never</strong> displayed publicly to anonymous visitors. Contact between users is facilitated through authenticated in-app notifications and regulated claim submissions. Sensitive verification answers are accessible only to the listing owner and authorized campus security moderators.
+        </p>
+
+        <h5 class="fw-bold text-primary mt-3">3. File Upload Integrity &amp; Media Storage</h5>
+        <p class="small text-muted">
+          Uploaded images undergo strict file header inspection and are assigned randomized cryptographic identifiers before storage. Files are kept in isolated storage directories and scrubbed of executable scripts.
+        </p>
+
+        <h5 class="fw-bold text-primary mt-3">4. Audit Logs and Accountability</h5>
+        <p class="small text-muted">
+          To maintain safety, all logins, administrative status updates, claim reviews, and listing removals are logged with timestamps and originating IP addresses for audit trail compliance.
+        </p>
+
+        <h5 class="fw-bold text-primary mt-3">5. Contact Campus Data Protection</h5>
+        <p class="small text-muted mb-0">
+          For privacy inquiries or account deactivation requests, please contact <code>privacy@campusconnect.edu</code> or visit the Campus IT Information Security Division.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

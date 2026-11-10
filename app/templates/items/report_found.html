@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Report Found Item — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ url_for('items.found_items') }}">Found Items</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Report Found Item</li>
+        </ol>
+      </nav>
+
+      <div class="card p-4 p-md-5 shadow-lg border-0 rounded-4 bg-white">
+        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+          <div class="cc-stat-icon green"><i class="bi bi-check2-circle fs-3"></i></div>
+          <div>
+            <span class="badge badge-found px-2 py-1 mb-1">Found Property Log</span>
+            <h3 class="fw-bold mb-0">Report a Found Item</h3>
+            <p class="text-muted small mb-0">Help a classmate or campus colleague retrieve their misplaced belongings</p>
+          </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('items.report_found') }}" enctype="multipart/form-data">
+          {{ form.hidden_tag() }}
+          <!-- Anti-Bot Honeypot Trap Field -->
+          <input type="text" name="cc_website_hp" class="cc-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+          <div class="row g-3">
+            <div class="col-md-12">
+              <label class="form-label small fw-semibold text-muted">{{ form.title.label }} <span class="text-danger">*</span></label>
+              {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), placeholder="e.g. Set of dorm keys on leather keychain") }}
+              {% for error in form.title.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.category_id.label }} <span class="text-danger">*</span></label>
+              {{ form.category_id(class="form-select" + (" is-invalid" if form.category_id.errors else "")) }}
+              {% for error in form.category_id.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.location.label }} <span class="text-danger">*</span></label>
+              {{ form.location(class="form-control" + (" is-invalid" if form.location.errors else ""), placeholder="e.g. Student Union Cafeteria Table #12") }}
+              {% for error in form.location.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.incident_date.label }} <span class="text-danger">*</span></label>
+              {{ form.incident_date(class="form-control" + (" is-invalid" if form.incident_date.errors else ""), type="date") }}
+              {% for error in form.incident_date.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.incident_time.label }}</label>
+              {{ form.incident_time(class="form-control" + (" is-invalid" if form.incident_time.errors else ""), type="time") }}
+              {% for error in form.incident_time.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label small fw-semibold text-muted">{{ form.description.label }} <span class="text-danger">*</span></label>
+              {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="4", placeholder="General description of the item found. Avoid disclosing private distinctive details so the true owner can prove ownership.") }}
+              {% for error in form.description.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label small fw-semibold text-muted">{{ form.identifying_features.label }}</label>
+              {{ form.identifying_features(class="form-control" + (" is-invalid" if form.identifying_features.errors else ""), rows="3", placeholder="Private verification answers you can use to confirm ownership when someone submits a claim.") }}
+              <div class="form-text small">Stored securely for verifying claims. Never displayed publicly.</div>
+              {% for error in form.identifying_features.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.contact_preference.label }}</label>
+              {{ form.contact_preference(class="form-select") }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.image.label }}</label>
+              {{ form.image(class="form-control" + (" is-invalid" if form.image.errors else ""), accept="image/png,image/jpeg,image/webp") }}
+              <div class="form-text small">Photo of the found item (JPG, PNG, WEBP, max 5MB).</div>
+              <div id="image-preview"></div>
+              {% for error in form.image.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-12 mt-4">
+              <button type="submit" class="btn btn-success w-100 py-2 fs-6 shadow-sm">
+                <i class="bi bi-box-seam me-1"></i> Post Found Item Listing
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

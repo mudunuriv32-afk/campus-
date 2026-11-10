@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Item Moderation — CampusConnect Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small mb-1">
+          <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+          <li class="breadcrumb-item active">Items</li>
+        </ol>
+      </nav>
+      <h2 class="fw-bold mb-0">Item Moderation &amp; Registry</h2>
+      <p class="text-muted small mb-0">Review all lost and found listings, resolve flagged items, and manage listings</p>
+    </div>
+  </div>
+
+  <!-- Filter & Search Bar -->
+  <div class="card p-3 shadow-sm border-0 bg-white rounded-3 mb-4">
+    <form method="GET" action="{{ url_for('admin.items') }}" class="row g-2 align-items-center">
+      <div class="col-lg-5 col-md-6">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" name="q" value="{{ search }}" class="form-control border-start-0 ps-0" placeholder="Search by title or location...">
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-3">
+        <select name="type" class="form-select">
+          <option value="">All Types</option>
+          <option value="LOST" {% if type_filter == 'LOST' %}selected{% endif %}>Lost Items</option>
+          <option value="FOUND" {% if type_filter == 'FOUND' %}selected{% endif %}>Found Items</option>
+        </select>
+      </div>
+      <div class="col-lg-3 col-md-3">
+        <select name="status" class="form-select">
+          <option value="">All Statuses</option>
+          <option value="OPEN" {% if status_filter == 'OPEN' %}selected{% endif %}>Open Only</option>
+          <option value="CLAIM_PENDING" {% if status_filter == 'CLAIM_PENDING' %}selected{% endif %}>Claim Pending</option>
+          <option value="RETURNED" {% if status_filter == 'RETURNED' %}selected{% endif %}>Returned</option>
+          <option value="CLOSED" {% if status_filter == 'CLOSED' %}selected{% endif %}>Closed</option>
+          <option value="FLAGGED" {% if status_filter == 'FLAGGED' %}selected{% endif %}>Flagged (Review)</option>
+        </select>
+      </div>
+      <div class="col-lg-2 col-md-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary-cc w-100">Filter</button>
+        {% if search or type_filter or status_filter %}
+          <a href="{{ url_for('admin.items') }}" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Items Table -->
+  {% if items %}
+    <div class="card shadow-sm border-0 bg-white rounded-4 overflow-hidden mb-4">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light small text-uppercase text-muted">
+            <tr>
+              <th scope="col" class="ps-4">Item Details</th>
+              <th scope="col">Type</th>
+              <th scope="col">Reporter</th>
+              <th scope="col">Location &amp; Date</th>
+              <th scope="col">Status</th>
+              <th scope="col" class="text-end pe-4">Moderation Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+              <tr>
+                <td class="ps-4">
+                  <div class="d-flex align-items-center gap-3">
+                    <div style="width: 44px; height: 44px; border-radius: 8px; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      {% if item.primary_image %}
+                        <img src="{{ url_for('static', filename='uploads/' + item.primary_image) }}" alt="{{ item.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                      {% else %}
+                        <i class="bi {{ item.category.icon if item.category else 'bi-box' }} text-muted"></i>
+                      {% endif %}
+                    </div>
+                    <div>
+                      <a href="{{ url_for('items.item_details', item_id=item.id) }}" class="fw-bold text-dark text-decoration-none">
+                        {{ item.title }}
+                      </a>
+                      <div class="small text-muted">{{ item.category.name if item.category else 'General' }}</div>
+                      {% if item.flagged_reason %}
+                        <div class="small text-danger fw-semibold"><i class="bi bi-flag-fill me-1"></i> {{ item.flagged_reason }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge {% if item.is_lost %}badge-lost{% else %}badge-found{% endif %}">
+                    {{ item.item_type }}
+                  </span>
+                </td>
+                <td>
+                  <div class="small fw-semibold text-dark">{{ item.reporter.full_name }}</div>
+                  <div class="small text-muted">{{ item.reporter.email }}</div>
+                </td>
+                <td>
+                  <div class="small text-dark">{{ item.location }}</div>
+                  <div class="small text-muted">{{ item.incident_date.strftime('%b %d, %Y') }}</div>
+                </td>
+                <td>
+                  {% if item.status == 'OPEN' %}
+                    <span class="badge bg-success-subtle text-success border">Open</span>
+                  {% elif item.status == 'CLAIM_PENDING' %}
+                    <span class="badge badge-pending">Claim Pending</span>
+                  {% elif item.status == 'RETURNED' %}
+                    <span class="badge badge-returned">Returned</span>
+                  {% elif item.status == 'CLOSED' %}
+                    <span class="badge bg-secondary">Closed</span>
+                  {% elif item.status == 'FLAGGED' %}
+                    <span class="badge badge-flagged">Flagged</span>
+                  {% endif %}
+                </td>
+                <td class="text-end pe-4">
+                  <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('items.item_details', item_id=item.id) }}" class="btn btn-outline-secondary" title="View Details">
+                      <i class="bi bi-eye"></i>
+                    </a>
+
+                    <!-- Unflag Option -->
+                    {% if item.status == 'FLAGGED' %}
+                      <form action="{{ url_for('admin.moderate_item', item_id=item.id) }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="UNFLAG">
+                        <button type="submit" class="btn btn-outline-success" title="Restore to OPEN">
+                          <i class="bi bi-flag"></i> Restore
+                        </button>
+                      </form>
+                    {% endif %}
+
+                    <!-- Close Option -->
+                    {% if item.status != 'CLOSED' and item.status != 'RETURNED' %}
+                      <form action="{{ url_for('admin.moderate_item', item_id=item.id) }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="CLOSE">
+                        <button type="submit" class="btn btn-outline-warning" title="Close Listing" data-confirm="Close this listing?">
+                          <i class="bi bi-archive"></i> Close
+                        </button>
+                      </form>
+                    {% endif %}
+
+                    <!-- Delete Option -->
+                    <form action="{{ url_for('admin.moderate_item', item_id=item.id) }}" method="POST" class="d-inline">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="action" value="DELETE">
+                      <button type="submit" class="btn btn-outline-danger" title="Permanently delete item" data-confirm="Permanently delete item #{{ item.id }}? This action is irreversible.">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+      <nav aria-label="Page navigation" class="d-flex justify-content-center">
+        <ul class="pagination">
+          <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.items', page=pagination.prev_num, q=search, type=type_filter, status=status_filter) }}">Previous</a>
+          </li>
+          {% for p in pagination.iter_pages() %}
+            {% if p %}
+              <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('admin.items', page=p, q=search, type=type_filter, status=status_filter) }}">{{ p }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+          <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.items', page=pagination.next_num, q=search, type=type_filter, status=status_filter) }}">Next</a>
+          </li>
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <div class="cc-empty-state my-4">
+      <i class="bi bi-box-seam cc-empty-icon"></i>
+      <h4 class="fw-bold">No Items Found</h4>
+      <p class="text-muted small">No items matched your moderation search parameters.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

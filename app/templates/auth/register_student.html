@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Student Registration — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card p-4 p-md-5 shadow-lg border-0 rounded-4 bg-white">
+        <div class="text-center mb-4">
+          <div class="cc-stat-icon blue mx-auto mb-2"><i class="bi bi-mortarboard fs-3"></i></div>
+          <h3 class="fw-bold">Student Account Registration</h3>
+          <p class="text-muted small">Join the official campus recovery network with your student credentials</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.register_student') }}">
+          {{ form.hidden_tag() }}
+          <!-- Anti-Bot Honeypot Trap Field -->
+          <input type="text" name="cc_website_hp" class="cc-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+          <div class="row g-3">
+            <div class="col-md-12">
+              <label class="form-label small fw-semibold text-muted">{{ form.full_name.label }}</label>
+              {{ form.full_name(class="form-control" + (" is-invalid" if form.full_name.errors else ""), placeholder="e.g. Jordan Lee") }}
+              {% for error in form.full_name.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.email.label }}</label>
+              {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="student@campusconnect.edu") }}
+              {% for error in form.email.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.campus_id.label }}</label>
+              {{ form.campus_id(class="form-control" + (" is-invalid" if form.campus_id.errors else ""), placeholder="e.g. STU-2024-8841") }}
+              {% for error in form.campus_id.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.department_id.label }}</label>
+              {{ form.department_id(class="form-select" + (" is-invalid" if form.department_id.errors else "")) }}
+              {% for error in form.department_id.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.designation_or_year.label }}</label>
+              {{ form.designation_or_year(class="form-select" + (" is-invalid" if form.designation_or_year.errors else "")) }}
+              {% for error in form.designation_or_year.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label small fw-semibold text-muted">{{ form.phone.label }}</label>
+              {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="+1 (555) 010-4491") }}
+              <div class="form-text small">Your phone number is kept confidential and never shown publicly on listings by default.</div>
+              {% for error in form.phone.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.password.label }}</label>
+              <div class="input-group">
+                {{ form.password(class="form-control border-end-0" + (" is-invalid" if form.password.errors else ""), placeholder="••••••••", id="password") }}
+                <button class="btn btn-outline-secondary border-start-0 btn-password-toggle" type="button" data-target="password" title="Toggle password visibility" aria-label="Toggle password visibility">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              <div class="password-requirements-checklist mt-2 p-2 bg-light rounded-3">
+                <div class="password-rule-item" id="rule-length"><i class="bi bi-dash-circle text-muted"></i> 8+ characters</div>
+                <div class="password-rule-item" id="rule-cases"><i class="bi bi-dash-circle text-muted"></i> Uppercase &amp; lowercase</div>
+                <div class="password-rule-item" id="rule-number"><i class="bi bi-dash-circle text-muted"></i> Number (0-9)</div>
+                <div class="password-rule-item" id="rule-symbol"><i class="bi bi-dash-circle text-muted"></i> Special symbol (@$!%*#?&)</div>
+              </div>
+              {% for error in form.password.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.confirm_password.label }}</label>
+              <div class="input-group">
+                {{ form.confirm_password(class="form-control border-end-0" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="••••••••", id="confirm_password") }}
+                <button class="btn btn-outline-secondary border-start-0 btn-password-toggle" type="button" data-target="confirm_password" title="Toggle password visibility" aria-label="Toggle password visibility">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              <!-- Live Password Match Indicator -->
+              <div id="password-match-indicator" class="password-match-badge d-none"></div>
+              {% for error in form.confirm_password.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-12 mt-4">
+              <button type="submit" class="btn btn-primary-cc w-100 py-2 fs-6 shadow-sm">
+                <i class="bi bi-person-check me-1"></i> Complete Student Registration
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="text-center mt-4 small text-muted">
+          Already registered? <a href="{{ url_for('auth.login') }}" class="text-primary fw-semibold text-decoration-none">Sign in here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

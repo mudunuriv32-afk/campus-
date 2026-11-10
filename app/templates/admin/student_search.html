@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% block title %}Student Management &amp; College ID Directory — CampusConnect Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Breadcrumbs -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb py-2 px-3 bg-white rounded-3 shadow-sm border small">
+      <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}" class="text-decoration-none text-primary"><i class="bi bi-speedometer2 me-1"></i>Admin Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('admin.users') }}" class="text-decoration-none text-primary">User Governance</a></li>
+      <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-mortarboard-fill me-1 text-primary"></i>Student Management</li>
+    </ol>
+  </nav>
+
+  <!-- Banner -->
+  <div class="card p-4 shadow-sm border-0 rounded-4 bg-navy-dark text-white mb-4" style="background: linear-gradient(135deg, var(--cc-navy-primary), var(--cc-navy-dark));">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <span class="badge bg-primary px-3 py-1 mb-2 fw-semibold">
+          <i class="bi bi-mortarboard-fill me-1"></i> Student Records Administration
+        </span>
+        <h2 class="fw-bold mb-1 text-white">Student Management by College ID</h2>
+        <p class="text-slate-300 small mb-0">Search registered students exclusively by their official College ID to inspect activities, reports, claims, and trigger password resets.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('admin.password_reset') }}" class="btn btn-warning btn-sm fw-semibold">
+          <i class="bi bi-key-fill me-1"></i> Password Reset Portal
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Card -->
+  <div class="card p-4 shadow-sm border-0 rounded-4 bg-white mb-4">
+    <h5 class="fw-bold mb-3 text-navy-primary">
+      <i class="bi bi-search text-primary me-2"></i>Search by Official College ID
+    </h5>
+
+    <form method="GET" action="{{ url_for('admin.students') }}">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-8 col-lg-6">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person-vcard"></i></span>
+            <input type="text" class="form-control border-start-0 font-monospace" name="college_id" value="{{ search_query or '' }}" placeholder="Enter Student College ID (e.g. STU-1001)" required autofocus>
+            <button class="btn btn-primary-cc px-4" type="submit">
+              <i class="bi bi-search me-1"></i> Find Student
+            </button>
+          </div>
+        </div>
+        {% if search_query %}
+          <div class="col-auto">
+            <a href="{{ url_for('admin.students') }}" class="btn btn-outline-secondary btn-sm">Clear Search</a>
+          </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Searched Student Result -->
+  {% if searched_student %}
+    <div class="card p-4 shadow-sm border-0 rounded-4 bg-white mb-4 border-start border-primary border-5">
+      <div class="row g-4 align-items-center">
+        <div class="col-md-2 text-center">
+          {% if searched_student.profile_photo %}
+            <img src="{{ url_for('static', filename='uploads/' + searched_student.profile_photo) }}" alt="{{ searched_student.full_name }}" class="rounded-circle shadow border border-3 border-primary object-fit-cover" style="width: 100px; height: 100px;">
+          {% else %}
+            <img src="{{ url_for('static', filename='images/default-avatar.svg') }}" alt="{{ searched_student.full_name }}" class="rounded-circle shadow border border-3 border-light object-fit-cover" style="width: 100px; height: 100px;">
+          {% endif %}
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <h4 class="fw-bold text-navy-primary mb-0">{{ searched_student.full_name }}</h4>
+            {% if searched_student.is_active %}
+              <span class="badge bg-success">Active</span>
+            {% else %}
+              <span class="badge bg-danger">Deactivated</span>
+            {% endif %}
+            {% if searched_student.force_password_change %}
+              <span class="badge bg-warning text-dark">Temp PW Pending</span>
+            {% endif %}
+          </div>
+          <div class="font-monospace text-primary fw-bold fs-6 mb-2">
+            <i class="bi bi-person-badge me-1"></i>College ID: {{ searched_student.campus_id }}
+          </div>
+          <div class="text-muted small">
+            <div><i class="bi bi-envelope me-1"></i>{{ searched_student.email }}</div>
+            <div><i class="bi bi-building me-1"></i>{{ searched_student.department.name if searched_student.department else 'General' }} &bull; {{ searched_student.designation_or_year or 'Student' }}</div>
+            <div><i class="bi bi-telephone me-1"></i>{{ searched_student.phone or 'No phone recorded' }}</div>
+          </div>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <div class="d-flex flex-column gap-2">
+            <a href="{{ url_for('admin.password_reset', college_id=searched_student.campus_id) }}" class="btn btn-warning-cc btn-sm">
+              <i class="bi bi-key-fill me-1"></i> Admin Password Reset
+            </a>
+            <form method="POST" action="{{ url_for('admin.toggle_user_status', user_id=searched_student.id) }}">
+              <button type="submit" class="btn btn-outline-{{ 'danger' if searched_student.is_active else 'success' }} btn-sm w-100" onclick="return confirm('Change active status for this student?');">
+                <i class="bi bi-power me-1"></i> {{ 'Deactivate Account' if searched_student.is_active else 'Activate Account' }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <!-- Student Activity Tabs / Breakdown -->
+      <div class="row g-4">
+        <!-- Reports -->
+        <div class="col-md-6">
+          <h6 class="fw-bold text-navy-primary mb-2">
+            <i class="bi bi-journal-text me-1 text-primary"></i> Recent Item Reports ({{ student_reports|length }})
+          </h6>
+          {% if student_reports %}
+            <div class="list-group list-group-flush border rounded-3">
+              {% for item in student_reports %}
+                <a href="{{ url_for('items.item_detail', item_id=item.id) }}" class="list-group-item list-group-item-action py-2 px-3 small d-flex justify-content-between align-items-center">
+                  <div>
+                    <span class="badge {% if item.item_type == 'LOST' %}bg-danger{% else %}bg-success{% endif %} me-1">{{ item.item_type }}</span>
+                    <span class="fw-semibold text-dark">{{ item.title }}</span>
+                    <div class="text-muted" style="font-size: 0.72rem;">{{ item.location }} &bull; {{ item.created_at.strftime('%b %d, %Y') }}</div>
+                  </div>
+                  <span class="badge bg-light text-dark border">{{ item.status }}</span>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="p-3 bg-light rounded-3 text-muted small text-center">No item reports published by this student.</div>
+          {% endif %}
+        </div>
+
+        <!-- Claims -->
+        <div class="col-md-6">
+          <h6 class="fw-bold text-navy-primary mb-2">
+            <i class="bi bi-file-earmark-check me-1 text-success"></i> Recent Claims Filed ({{ student_claims|length }})
+          </h6>
+          {% if student_claims %}
+            <div class="list-group list-group-flush border rounded-3">
+              {% for claim in student_claims %}
+                <div class="list-group-item py-2 px-3 small d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="fw-semibold text-dark">Item #{{ claim.item_id }}: {{ claim.item.title if claim.item else 'Item' }}</div>
+                    <div class="text-muted" style="font-size: 0.72rem;">Filed on {{ claim.created_at.strftime('%b %d, %Y') }}</div>
+                  </div>
+                  <div>
+                    {% if claim.status == 'APPROVED' %}
+                      <span class="badge bg-success">APPROVED</span>
+                    {% elif claim.status == 'REJECTED' %}
+                      <span class="badge bg-danger">REJECTED</span>
+                    {% else %}
+                      <span class="badge bg-warning text-dark">PENDING</span>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="p-3 bg-light rounded-3 text-muted small text-center">No claims filed by this student.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Student Directory Table -->
+  <div class="card p-4 shadow-sm border-0 rounded-4 bg-white">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0 text-navy-primary">
+        <i class="bi bi-people me-2 text-primary"></i> Registered Student Directory
+      </h5>
+      <span class="badge bg-light text-muted border">Showing Recent Registrations</span>
+    </div>
+
+    {% if all_students %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 small">
+          <thead class="table-light">
+            <tr>
+              <th>College ID</th>
+              <th>Student Name</th>
+              <th>Email</th>
+              <th>Department</th>
+              <th>Status</th>
+              <th>Registered</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in all_students %}
+              <tr>
+                <td>
+                  <span class="fw-bold font-monospace text-primary">{{ s.campus_id }}</span>
+                </td>
+                <td class="fw-semibold text-dark">
+                  {{ s.full_name }}
+                  {% if s.force_password_change %}
+                    <span class="badge bg-warning text-dark ms-1" style="font-size: 0.65rem;">Temp PW</span>
+                  {% endif %}
+                </td>
+                <td class="text-muted">{{ s.email }}</td>
+                <td>{{ s.department.code if s.department else 'GEN' }}</td>
+                <td>
+                  {% if s.is_active %}
+                    <span class="badge bg-success">Active</span>
+                  {% else %}
+                    <span class="badge bg-danger">Inactive</span>
+                  {% endif %}
+                </td>
+                <td class="text-muted">{{ s.created_at.strftime('%b %d, %Y') }}</td>
+                <td class="text-end">
+                  <a href="{{ url_for('admin.students', college_id=s.campus_id) }}" class="btn btn-outline-primary btn-sm py-0 px-2" title="Inspect Student">
+                    <i class="bi bi-eye"></i> View
+                  </a>
+                  <a href="{{ url_for('admin.password_reset', college_id=s.campus_id) }}" class="btn btn-outline-warning btn-sm py-0 px-2 text-dark" title="Reset Password">
+                    <i class="bi bi-key"></i> Reset
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-4 text-muted small">No students registered yet.</div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

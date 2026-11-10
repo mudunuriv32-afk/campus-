@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Category Management — CampusConnect Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small mb-1">
+          <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+          <li class="breadcrumb-item active">Categories</li>
+        </ol>
+      </nav>
+      <h2 class="fw-bold mb-0">Campus Item Categories</h2>
+      <p class="text-muted small mb-0">Manage classification categories and icons used across lost and found reports</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Categories List -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 bg-white rounded-4 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small text-uppercase text-muted">
+              <tr>
+                <th scope="col" class="ps-4">Icon &amp; Name</th>
+                <th scope="col">Description</th>
+                <th scope="col" class="text-end pe-4">Items Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in categories %}
+                <tr>
+                  <td class="ps-4">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="cc-stat-icon blue" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                        <i class="bi {{ c.icon }}"></i>
+                      </div>
+                      <span class="fw-bold text-dark">{{ c.name }}</span>
+                    </div>
+                  </td>
+                  <td class="small text-muted">{{ c.description or '-' }}</td>
+                  <td class="text-end pe-4">
+                    <span class="badge bg-light text-dark border">{{ c.items.count() }} listings</span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create New Category Card -->
+    <div class="col-lg-4">
+      <div class="card p-4 shadow-sm border-0 rounded-4 bg-white">
+        <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle me-1 text-primary"></i> Add New Category</h5>
+        <form method="POST" action="{{ url_for('admin.categories') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-muted">Category Name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Bicycles, Smart Watches" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-muted">Bootstrap Icon Class</label>
+            <input type="text" name="icon" class="form-control" value="bi-tag" placeholder="e.g. bi-bicycle, bi-smartwatch">
+            <div class="form-text small">Use valid Bootstrap Icon classes (bi-*).</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-muted">Description</label>
+            <textarea name="description" class="form-control" rows="3" placeholder="Brief description of items in this category..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary-cc w-100">
+            <i class="bi bi-save me-1"></i> Create Category
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

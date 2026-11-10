@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}About — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">About CampusConnect</li>
+        </ol>
+      </nav>
+
+      <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill mb-2 fw-semibold">About the Portal</span>
+      <h1 class="fw-bold mb-4">Centralized Digital Lost &amp; Found Portal</h1>
+
+      <div class="card p-4 shadow-sm border-0 mb-4 bg-white rounded-4">
+        <h4 class="fw-bold text-primary mb-3">Our Mission</h4>
+        <p class="text-muted leading-relaxed">
+          Every semester, hundreds of valuable student belongings—laptops, identification badges, textbooks, electronic accessories, and keys—go missing across classrooms, libraries, laboratories, and dining halls. Before CampusConnect, students were forced to rely on scattered social media posts, crowded bulletin boards, or repeatedly checking with various departmental security desks.
+        </p>
+        <p class="text-muted leading-relaxed mb-0">
+          <strong>CampusConnect</strong> was engineered to bridge this gap. We provide a single, verified, university-wide platform where lost property can be reported in seconds, discovered belongings can be published safely, and verifiable claim workflows ensure items are reunited with their genuine owners.
+        </p>
+      </div>
+
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="p-4 bg-white rounded-4 shadow-sm border h-100">
+            <div class="cc-stat-icon blue mb-3"><i class="bi bi-shield-check"></i></div>
+            <h5 class="fw-bold">Role-Based Security</h5>
+            <p class="small text-muted mb-0">
+              Integrated with institutional student and staff roles. Faculty and campus security personnel have access to dedicated moderation and verification tools.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="p-4 bg-white rounded-4 shadow-sm border h-100">
+            <div class="cc-stat-icon green mb-3"><i class="bi bi-patch-check"></i></div>
+            <h5 class="fw-bold">Verified Ownership</h5>
+            <p class="small text-muted mb-0">
+              Claim requests mandate distinctive verification details (such as serial numbers or private markings), safeguarding against fraudulent claims.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4 shadow-sm border rounded-4 bg-light">
+        <h5 class="fw-bold mb-2">Campus Security Partnership</h5>
+        <p class="small text-muted mb-3">
+          CampusConnect operates in full coordination with the Campus Security Department. Any unclaimed high-value items submitted to departmental offices are securely logged and transferred to the Main Security Control Center.
+        </p>
+        <div class="d-flex align-items-center gap-3">
+          <a href="{{ url_for('items.lost_items') }}" class="btn btn-primary-cc btn-sm">Browse Lost Items</a>
+          <a href="{{ url_for('main.help') }}" class="btn btn-outline-secondary btn-sm">Read User Guide</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

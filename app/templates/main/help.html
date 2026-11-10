@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Help & Contact — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Help &amp; Contact</li>
+        </ol>
+      </nav>
+
+      <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill mb-2 fw-semibold">Support Center</span>
+      <h1 class="fw-bold mb-4">How Can We Help You?</h1>
+
+      <div class="row g-4 mb-5">
+        <div class="col-md-4">
+          <div class="card p-3 shadow-sm border-0 bg-white rounded-3 h-100 text-center">
+            <div class="cc-stat-icon blue mx-auto mb-2"><i class="bi bi-geo-alt"></i></div>
+            <h6 class="fw-bold">Security Office</h6>
+            <p class="small text-muted mb-1">Main Gate Security Desk</p>
+            <p class="small text-muted mb-0">Ground Floor, Block A<br>Available 24/7</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card p-3 shadow-sm border-0 bg-white rounded-3 h-100 text-center">
+            <div class="cc-stat-icon amber mx-auto mb-2"><i class="bi bi-telephone"></i></div>
+            <h6 class="fw-bold">Helpline Extension</h6>
+            <p class="small text-muted mb-1">Campus Phone: Ext 2100</p>
+            <p class="small text-muted mb-0">Direct: +1 (555) 0199-2100<br>Mon - Fri: 8am - 8pm</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card p-3 shadow-sm border-0 bg-white rounded-3 h-100 text-center">
+            <div class="cc-stat-icon green mx-auto mb-2"><i class="bi bi-envelope"></i></div>
+            <h6 class="fw-bold">Email Support</h6>
+            <p class="small text-muted mb-1">helpdesk@campusconnect.edu</p>
+            <p class="small text-muted mb-0">Average response time:<br>Under 2 hours</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step-by-Step Guides -->
+      <div class="card p-4 shadow-sm border-0 mb-4 bg-white rounded-4">
+        <h4 class="fw-bold text-dark mb-3"><i class="bi bi-lightbulb me-2 text-warning"></i> Quick User Guides</h4>
+        
+        <div class="mb-4">
+          <h6 class="fw-bold text-primary">Q: What should I do immediately after losing an item?</h6>
+          <p class="small text-muted mb-0">
+            1. Sign in to your account and click <a href="{{ url_for('items.report_lost') }}">Report Lost Item</a>.<br>
+            2. Enter the exact campus building, floor, room number, or outdoor landmark where you last had the item.<br>
+            3. Check the <a href="{{ url_for('items.found_items') }}">Found Items page</a> to see if someone has already surrendered it.
+          </p>
+        </div>
+
+        <div class="mb-4">
+          <h6 class="fw-bold text-primary">Q: I picked up a lost item. Where do I store it?</h6>
+          <p class="small text-muted mb-0">
+            Post a quick listing using <a href="{{ url_for('items.report_found') }}">Report Found Item</a> so the owner knows it is safe. If the item is high-value (laptop, wallet, keys, phone), please hand it over to the nearest faculty lab in-charge or take it directly to the Central Security Control Room.
+          </p>
+        </div>
+
+        <div class="mb-0">
+          <h6 class="fw-bold text-primary">Q: How do I prove an item belongs to me?</h6>
+          <p class="small text-muted mb-0">
+            Click "Request Claim" on the item page and specify identifiable marks that are not visible in public photos (e.g. laptop MAC address or serial number, lock-screen wallpaper, stickers on the bottom, or exact cash denominations in a wallet).
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

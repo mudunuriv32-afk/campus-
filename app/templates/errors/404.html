@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found (404) — CampusConnect{% endblock %}
+{% block content %}
+<div class="container py-5 text-center">
+  <div class="py-5">
+    <div class="display-1 fw-bold text-primary mb-3"><i class="bi bi-compass"></i> 404</div>
+    <h2 class="fw-bold mb-3">Item or Page Not Found</h2>
+    <p class="text-muted lead mx-auto mb-4" style="max-width: 500px;">
+      The listing, report, or resource you are looking for may have been resolved, removed, or relocated.
+    </p>
+    <div class="d-flex justify-content-center gap-2">
+      <a href="{{ url_for('main.index') }}" class="btn btn-primary-cc">
+        <i class="bi bi-house-door me-1"></i> Return Home
+      </a>
+      <a href="{{ url_for('items.lost_items') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-search me-1"></i> Browse Lost Items
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

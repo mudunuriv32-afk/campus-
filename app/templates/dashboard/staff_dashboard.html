@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Faculty & Staff Moderation Portal — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Staff Banner -->
+  <div class="card p-4 shadow-sm border-0 rounded-4 bg-white mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="cc-stat-icon green" style="width: 56px; height: 56px; font-size: 1.8rem;">
+          <i class="bi bi-person-badge-fill"></i>
+        </div>
+        <div>
+          <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 mb-1">Staff &amp; Faculty Operations</span>
+          <h3 class="fw-bold mb-0">{{ user.full_name }}</h3>
+          <p class="text-muted small mb-0">{{ user.campus_id }} • {{ user.designation_or_year }} ({{ user.department.name if user.department else 'Staff' }})</p>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('items.report_found') }}" class="btn btn-success btn-sm shadow-sm">
+          <i class="bi bi-plus-circle me-1"></i> Log Found Item to Custody
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Campus Operational Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="cc-stat-card p-3">
+        <div class="cc-stat-icon blue"><i class="bi bi-broadcast"></i></div>
+        <div>
+          <div class="cc-stat-val">{{ stats.open_items }}</div>
+          <div class="cc-stat-label">Active Campus Listings</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="cc-stat-card p-3">
+        <div class="cc-stat-icon rose"><i class="bi bi-flag-fill"></i></div>
+        <div>
+          <div class="cc-stat-val text-danger">{{ stats.flagged_items }}</div>
+          <div class="cc-stat-label">Items Under Moderation</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="cc-stat-card p-3">
+        <div class="cc-stat-icon amber"><i class="bi bi-clock-history"></i></div>
+        <div>
+          <div class="cc-stat-val text-warning">{{ stats.pending_claims }}</div>
+          <div class="cc-stat-label">Pending Claim Reviews</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="cc-stat-card p-3">
+        <div class="cc-stat-icon green"><i class="bi bi-patch-check"></i></div>
+        <div>
+          <div class="cc-stat-val text-success">{{ stats.returned_items }}</div>
+          <div class="cc-stat-label">Safely Returned Items</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Flagged Reports Table -->
+    <div class="col-lg-6">
+      <div class="card p-4 shadow-sm border-0 rounded-4 bg-white mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0 text-danger"><i class="bi bi-flag me-1"></i> Flagged Listings</h5>
+          <span class="badge bg-danger">{{ flagged_items|length }}</span>
+        </div>
+
+        {% if flagged_items %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+              <thead class="table-light">
+                <tr>
+                  <th>Item</th>
+                  <th>Flag Reason</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in flagged_items %}
+                  <tr>
+                    <td>
+                      <a href="{{ url_for('items.item_details', item_id=item.id) }}" class="fw-bold text-dark text-decoration-none">
+                        {{ item.title }}
+                      </a>
+                      <div class="text-muted">{{ item.location }}</div>
+                    </td>
+                    <td class="text-danger small">{{ item.flagged_reason or 'Inappropriate content reported' }}</td>
+                    <td class="text-end">
+                      <a href="{{ url_for('items.item_details', item_id=item.id) }}" class="btn btn-outline-secondary btn-sm">
+                        Inspect
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted small">
+            <i class="bi bi-shield-check fs-2 d-block text-success mb-2"></i>
+            No listings currently flagged. Campus registry is in good standing.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Pending Claims Queue -->
+    <div class="col-lg-6">
+      <div class="card p-4 shadow-sm border-0 rounded-4 bg-white mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-clock me-1"></i> Pending Claims Queue</h5>
+          <span class="badge bg-primary">{{ recent_claims|length }}</span>
+        </div>
+
+        {% if recent_claims %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+              <thead class="table-light">
+                <tr>
+                  <th>Item</th>
+                  <th>Claimant</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in recent_claims %}
+                  <tr>
+                    <td>
+                      <div class="fw-bold text-dark">{{ c.item.title }}</div>
+                      <div class="text-muted">{{ c.item.location }}</div>
+                    </td>
+                    <td>
+                      <div>{{ c.claimant.full_name }}</div>
+                      <div class="text-muted">{{ c.claimant.campus_id }}</div>
+                    </td>
+                    <td class="text-end">
+                      <a href="{{ url_for('claims.review_claim', claim_id=c.id) }}" class="btn btn-primary-cc btn-sm">
+                        Review
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted small">
+            <i class="bi bi-check2-circle fs-2 d-block text-success mb-2"></i>
+            No pending claims in queue.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

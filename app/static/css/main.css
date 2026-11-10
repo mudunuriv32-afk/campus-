@@ -1,0 +1,456 @@
+/* CampusConnect Custom Styling — Modern Collegiate Navy Theme */
+:root {
+  --cc-navy-primary: #0a1f38;
+  --cc-navy-dark: #071526;
+  --cc-navy-light: #16365c;
+  --cc-blue-accent: #1a73e8;
+  --cc-blue-hover: #1557b0;
+  --cc-blue-soft: #e8f0fe;
+  --cc-teal-success: #0d9488;
+  --cc-amber-warning: #d97706;
+  --cc-rose-danger: #e11d48;
+  --cc-gray-50: #f8fafc;
+  --cc-gray-100: #f1f5f9;
+  --cc-gray-200: #e2e8f0;
+  --cc-gray-400: #94a3b8;
+  --cc-gray-600: #475569;
+  --cc-gray-800: #1e293b;
+  --cc-card-shadow: 0 4px 20px -2px rgba(10, 31, 56, 0.08);
+  --cc-card-shadow-hover: 0 12px 30px -4px rgba(10, 31, 56, 0.16);
+  --cc-radius: 12px;
+  --cc-radius-sm: 8px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--cc-gray-50);
+  color: var(--cc-gray-800);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+/* Navbar */
+.cc-navbar {
+  background-color: var(--cc-navy-primary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(7, 21, 38, 0.2);
+  padding: 0.75rem 0;
+}
+
+.cc-brand {
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cc-brand-badge {
+  background: linear-gradient(135deg, #1a73e8, #60a5fa);
+  color: white;
+  padding: 0.35rem 0.55rem;
+  border-radius: var(--cc-radius-sm);
+  font-size: 1rem;
+}
+
+.nav-link {
+  color: #cbd5e1 !important;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.85rem !important;
+  border-radius: var(--cc-radius-sm);
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.cc-nav-cta {
+  background-color: var(--cc-blue-accent);
+  color: #ffffff !important;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem !important;
+  border-radius: var(--cc-radius-sm);
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.35);
+}
+
+.cc-nav-cta:hover {
+  background-color: var(--cc-blue-hover) !important;
+  transform: translateY(-1px);
+}
+
+/* Hero Section */
+.cc-hero {
+  background: linear-gradient(145deg, var(--cc-navy-primary) 0%, var(--cc-navy-dark) 100%);
+  color: white;
+  padding: 4.5rem 0 3.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.cc-hero::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: radial-gradient(circle at 85% 20%, rgba(26, 115, 232, 0.2) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.cc-hero h1 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.cc-hero p {
+  color: #cbd5e1;
+  font-size: 1.15rem;
+  max-width: 640px;
+}
+
+/* Cards */
+.cc-card {
+  background: #ffffff;
+  border: 1px solid var(--cc-gray-200);
+  border-radius: var(--cc-radius);
+  box-shadow: var(--cc-card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.cc-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--cc-card-shadow-hover);
+}
+
+.cc-card-img-wrap {
+  position: relative;
+  height: 200px;
+  background-color: var(--cc-gray-100);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cc-card-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.cc-card:hover .cc-card-img-wrap img {
+  transform: scale(1.04);
+}
+
+.cc-card-placeholder {
+  color: var(--cc-gray-400);
+  font-size: 3rem;
+}
+
+/* Badges */
+.badge-lost {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  font-weight: 600;
+  border: 1px solid #fecaca;
+}
+
+.badge-found {
+  background-color: #dcfce7;
+  color: #15803d;
+  font-weight: 600;
+  border: 1px solid #bbf7d0;
+}
+
+.badge-returned {
+  background-color: #e0e7ff;
+  color: #4338ca;
+  font-weight: 600;
+  border: 1px solid #c7d2fe;
+}
+
+.badge-pending {
+  background-color: #fef3c7;
+  color: #b45309;
+  font-weight: 600;
+  border: 1px solid #fde68a;
+}
+
+.badge-flagged {
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-weight: 600;
+  border: 1px solid #f87171;
+}
+
+/* Stat Cards */
+.cc-stat-card {
+  background: white;
+  border-radius: var(--cc-radius);
+  padding: 1.5rem;
+  border: 1px solid var(--cc-gray-200);
+  box-shadow: var(--cc-card-shadow);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.cc-stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--cc-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.cc-stat-icon.blue {
+  background-color: var(--cc-blue-soft);
+  color: var(--cc-blue-accent);
+}
+
+.cc-stat-icon.green {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.cc-stat-icon.amber {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.cc-stat-icon.rose {
+  background-color: #ffe4e6;
+  color: #e11d48;
+}
+
+.cc-stat-val {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--cc-navy-primary);
+  line-height: 1.1;
+}
+
+.cc-stat-label {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--cc-gray-600);
+}
+
+/* Match Card */
+.cc-match-card {
+  border: 2px dashed #93c5fd;
+  background-color: #f0f7ff;
+  border-radius: var(--cc-radius);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.cc-match-score {
+  background-color: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+/* Empty States */
+.cc-empty-state {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  background: white;
+  border-radius: var(--cc-radius);
+  border: 1px dashed var(--cc-gray-200);
+}
+
+.cc-empty-icon {
+  font-size: 3.5rem;
+  color: var(--cc-gray-400);
+  margin-bottom: 1rem;
+}
+
+/* Buttons */
+.btn-primary-cc {
+  background-color: var(--cc-blue-accent);
+  color: white;
+  border: none;
+  font-weight: 600;
+  border-radius: var(--cc-radius-sm);
+  padding: 0.55rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.btn-primary-cc:hover {
+  background-color: var(--cc-blue-hover);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-navy {
+  background-color: var(--cc-navy-primary);
+  color: white;
+  border: none;
+  font-weight: 600;
+  border-radius: var(--cc-radius-sm);
+  padding: 0.55rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.btn-navy:hover {
+  background-color: var(--cc-navy-light);
+  color: white;
+}
+
+/* Footer */
+.cc-footer {
+  background-color: var(--cc-navy-dark);
+  color: #94a3b8;
+  padding: 3.5rem 0 1.5rem;
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cc-footer a {
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.cc-footer a:hover {
+  color: #ffffff;
+}
+
+.cc-footer-divider {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 2rem 0 1.5rem;
+}
+
+/* Notifications Drawer */
+.notification-unread {
+  background-color: #f0f7ff;
+  border-left: 4px solid var(--cc-blue-accent);
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .cc-hero {
+    padding: 3rem 0 2rem;
+  }
+  .cc-hero h1 {
+    font-size: 2rem;
+  }
+  .cc-stat-card {
+    padding: 1rem;
+  }
+  .cc-stat-val {
+    font-size: 1.5rem;
+  }
+}
+
+/* Universal Refresh Button & Rotation Animation */
+.cc-refresh-btn {
+  transition: all 0.2s ease;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.cc-refresh-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.cc-spin {
+  animation: cc-spin-keyframes 0.75s linear infinite;
+  display: inline-block;
+}
+
+@keyframes cc-spin-keyframes {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Password Input Group & Toggle Controls */
+.password-input-group {
+  position: relative;
+}
+
+.password-input-group .btn-password-toggle {
+  border-color: #dee2e6;
+  background-color: #f8fafc;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.password-input-group .btn-password-toggle:hover {
+  background-color: #e2e8f0;
+  color: var(--cc-navy-primary);
+}
+
+/* Password Live Match Indicator Badge */
+.password-match-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.password-match-badge.matched {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.password-match-badge.mismatched {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* Password Rule Checklist */
+.password-rule-item {
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #64748b;
+  margin-bottom: 0.2rem;
+  transition: color 0.15s ease;
+}
+
+.password-rule-item.valid {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.password-rule-item.valid i {
+  color: #16a34a;
+}
+
+/* Invisible Anti-Bot Honeypot Field */
+.cc-honeypot {
+  display: none !important;
+  position: absolute !important;
+  left: -99999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Claims Oversight — CampusConnect Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small mb-1">
+          <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+          <li class="breadcrumb-item active">Claims</li>
+        </ol>
+      </nav>
+      <h2 class="fw-bold mb-0">Platform Claims Oversight</h2>
+      <p class="text-muted small mb-0">Review all ownership claims submitted across campus and resolve disputes</p>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="card p-3 shadow-sm border-0 bg-white rounded-3 mb-4">
+    <form method="GET" action="{{ url_for('admin.claims') }}" class="row g-2 align-items-center">
+      <div class="col-md-4">
+        <select name="status" class="form-select">
+          <option value="">All Claim Statuses</option>
+          <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending Review</option>
+          <option value="APPROVED" {% if status_filter == 'APPROVED' %}selected{% endif %}>Approved / Returned</option>
+          <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>Rejected</option>
+          <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary-cc w-100">Filter</button>
+        {% if status_filter %}
+          <a href="{{ url_for('admin.claims') }}" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Claims Table -->
+  {% if claims %}
+    <div class="card shadow-sm border-0 bg-white rounded-4 overflow-hidden mb-4">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light small text-uppercase text-muted">
+            <tr>
+              <th scope="col" class="ps-4">Item</th>
+              <th scope="col">Claimant</th>
+              <th scope="col">Claim Details</th>
+              <th scope="col">Status</th>
+              <th scope="col">Date</th>
+              <th scope="col" class="text-end pe-4">Resolution</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in claims %}
+              <tr>
+                <td class="ps-4">
+                  <a href="{{ url_for('items.item_details', item_id=c.item.id) }}" class="fw-bold text-dark text-decoration-none">
+                    {{ c.item.title }}
+                  </a>
+                  <div class="small text-muted">{{ c.item.location }} ({{ c.item.item_type }})</div>
+                </td>
+                <td>
+                  <div class="fw-semibold text-dark">{{ c.claimant.full_name }}</div>
+                  <div class="small text-muted">{{ c.claimant.campus_id }} • {{ c.claimant.email }}</div>
+                </td>
+                <td>
+                  <div class="small text-dark text-truncate" style="max-width: 250px;" title="{{ c.claim_description }}">
+                    {{ c.claim_description }}
+                  </div>
+                  <div class="small text-primary text-truncate" style="max-width: 250px;" title="{{ c.verification_details }}">
+                    <i class="bi bi-shield-check me-1"></i> {{ c.verification_details }}
+                  </div>
+                </td>
+                <td>
+                  {% if c.status == 'PENDING' %}
+                    <span class="badge badge-pending">Pending</span>
+                  {% elif c.status == 'APPROVED' %}
+                    <span class="badge badge-returned">Approved</span>
+                  {% elif c.status == 'REJECTED' %}
+                    <span class="badge badge-flagged">Rejected</span>
+                  {% elif c.status == 'CANCELLED' %}
+                    <span class="badge bg-secondary">Cancelled</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="small text-muted">{{ c.created_at.strftime('%b %d, %Y') }}</span>
+                </td>
+                <td class="text-end pe-4">
+                  <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('claims.review_claim', claim_id=c.id) }}" class="btn btn-outline-primary" title="Review Evidence">
+                      <i class="bi bi-eye"></i>
+                    </a>
+
+                    {% if c.status == 'PENDING' %}
+                      <!-- Admin Override Approve Form -->
+                      <form action="{{ url_for('admin.resolve_claim', claim_id=c.id) }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="APPROVE">
+                        <input type="hidden" name="remarks" value="Approved by Campus Administrator override.">
+                        <button type="submit" class="btn btn-outline-success" title="Admin Approve & Return" data-confirm="Approve this claim? Item will be marked as RETURNED.">
+                          <i class="bi bi-check-lg"></i>
+                        </button>
+                      </form>
+
+                      <!-- Admin Override Reject Form -->
+                      <form action="{{ url_for('admin.resolve_claim', claim_id=c.id) }}" method="POST" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="REJECT">
+                        <input type="hidden" name="remarks" value="Rejected by Campus Administrator review.">
+                        <button type="submit" class="btn btn-outline-danger" title="Admin Reject" data-confirm="Reject this claim?">
+                          <i class="bi bi-x-lg"></i>
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+      <nav aria-label="Page navigation" class="d-flex justify-content-center">
+        <ul class="pagination">
+          <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.claims', page=pagination.prev_num, status=status_filter) }}">Previous</a>
+          </li>
+          {% for p in pagination.iter_pages() %}
+            {% if p %}
+              <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('admin.claims', page=p, status=status_filter) }}">{{ p }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+          <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.claims', page=pagination.next_num, status=status_filter) }}">Next</a>
+          </li>
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <div class="cc-empty-state my-4">
+      <i class="bi bi-award cc-empty-icon"></i>
+      <h4 class="fw-bold">No Claims Found</h4>
+      <p class="text-muted small">No claims match the selected criteria.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

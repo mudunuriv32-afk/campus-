@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Platform Configuration — CampusConnect Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small mb-1">
+          <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+          <li class="breadcrumb-item active">Settings</li>
+        </ol>
+      </nav>
+      <h2 class="fw-bold mb-0">Platform Settings &amp; Parameters</h2>
+      <p class="text-muted small mb-4">Manage institutional defaults, contact channels, and moderation thresholds</p>
+
+      <div class="card p-4 p-md-5 shadow-sm border-0 rounded-4 bg-white">
+        <form method="POST" action="{{ url_for('admin.settings') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold text-muted">Campus / University Name</label>
+            <input type="text" name="campus_name" value="{{ settings.get('campus_name', 'Metropolitan University') }}" class="form-control" required>
+            <div class="form-text small">Official name displayed on headers and automated correspondence.</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold text-muted">Central Security Office Drop-off Location</label>
+            <input type="text" name="security_office_location" value="{{ settings.get('security_office_location', 'Main Gate Security Center, Ground Floor Block A') }}" class="form-control" required>
+            <div class="form-text small">Recommended campus location for safe property exchange and handover.</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold text-muted">Helpdesk / Support Email</label>
+            <input type="email" name="support_email" value="{{ settings.get('support_email', 'help@campusconnect.edu') }}" class="form-control" required>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold text-muted">Unclaimed Property Retention Period (Days)</label>
+            <input type="number" name="retention_period_days" value="{{ settings.get('retention_period_days', '90') }}" class="form-control" required min="14" max="365">
+            <div class="form-text small">Standard retention duration before unclaimed property enters university donation/auction protocol.</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold text-muted">Require Administrative Verification for Staff Registrations</label>
+            <select name="require_staff_approval" class="form-select">
+              <option value="True" {% if settings.get('require_staff_approval') == 'True' %}selected{% endif %}>Yes (Recommended for Campus Security)</option>
+              <option value="False" {% if settings.get('require_staff_approval') == 'False' %}selected{% endif %}>No (Auto-Approve Staff Accounts)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary-cc py-2 px-4 shadow-sm">
+            <i class="bi bi-save me-1"></i> Save Platform Configuration
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

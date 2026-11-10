@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CampusConnect — Campus Lost & Found Portal{% endblock %}</title>
+  
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Custom Collegiate Navy Theme Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar navbar-expand-lg cc-navbar">
+      <div class="container">
+        <a class="navbar-brand cc-brand" href="{{ url_for('main.index') }}">
+          <span class="cc-brand-badge"><i class="bi bi-shield-check"></i></span>
+          <span>CampusConnect</span>
+        </a>
+
+        <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="bi bi-list fs-2 text-white"></i>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <!-- Main Nav Links -->
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == url_for('items.lost_items') %}active{% endif %}" href="{{ url_for('items.lost_items') }}">
+                <i class="bi bi-search me-1"></i> Lost Items
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == url_for('items.found_items') %}active{% endif %}" href="{{ url_for('items.found_items') }}">
+                <i class="bi bi-box-seam me-1"></i> Found Items
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == url_for('main.about') %}active{% endif %}" href="{{ url_for('main.about') }}">
+                About
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == url_for('main.help') %}active{% endif %}" href="{{ url_for('main.help') }}">
+                Help &amp; FAQ
+              </a>
+            </li>
+          </ul>
+
+          <!-- User Action Items & Controls -->
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- Universal Page & Data Refresh Button across all domains -->
+            <button type="button" class="btn btn-outline-light btn-sm d-flex align-items-center gap-1 cc-refresh-btn" id="globalRefreshBtn" title="Refresh Live Data" aria-label="Refresh Page Data">
+              <i class="bi bi-arrow-clockwise" id="refreshIcon"></i>
+              <span class="d-none d-sm-inline small">Refresh</span>
+            </button>
+
+            {% if current_user %}
+              <!-- Report Dropdown -->
+              <div class="dropdown">
+                <button class="btn btn-primary-cc dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-plus-circle me-1"></i> Report Item
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                  <li><a class="dropdown-item text-danger fw-semibold" href="{{ url_for('items.report_lost') }}"><i class="bi bi-exclamation-triangle me-2"></i> Report Lost Item</a></li>
+                  <li><a class="dropdown-item text-success fw-semibold" href="{{ url_for('items.report_found') }}"><i class="bi bi-check2-circle me-2"></i> Report Found Item</a></li>
+                </ul>
+              </div>
+
+              <!-- Notifications Icon with Count -->
+              <a href="{{ url_for('dashboard.notifications') }}" class="btn btn-outline-light btn-sm position-relative px-2 py-1" title="Notifications">
+                <i class="bi bi-bell fs-6"></i>
+                {% if unread_notifications_count > 0 %}
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ unread_notifications_count }}
+                    <span class="visually-hidden">unread messages</span>
+                  </span>
+                {% endif %}
+              </a>
+
+              <!-- User Profile & Navigation Dropdown -->
+              <div class="dropdown">
+                <button class="btn btn-outline-light dropdown-toggle btn-sm d-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-person-circle"></i>
+                  <span class="d-none d-md-inline">{{ current_user.full_name.split()[0] }}</span>
+                  <span class="badge bg-secondary ms-1">{{ current_user.role.name|capitalize }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                  <li class="px-3 py-2 border-bottom">
+                    <div class="fw-bold">{{ current_user.full_name }}</div>
+                    <div class="small text-muted">{{ current_user.email }}</div>
+                    <div class="small text-primary">{{ current_user.campus_id }}</div>
+                  </li>
+                  {% if current_user.is_admin %}
+                    <li><a class="dropdown-item fw-semibold text-primary" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Admin Portal</a></li>
+                    <li><a class="dropdown-item fw-semibold text-danger" href="{{ url_for('admin.password_reset') }}"><i class="bi bi-key-fill me-2"></i> Password Reset Portal</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('admin.students') }}"><i class="bi bi-mortarboard me-2"></i> Student Management</a></li>
+                  {% elif current_user.is_staff %}
+                    <li><a class="dropdown-item fw-semibold text-primary" href="{{ url_for('dashboard.staff_dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Staff Dashboard</a></li>
+                  {% else %}
+                    <li><a class="dropdown-item fw-semibold text-primary" href="{{ url_for('dashboard.student_dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Student Dashboard</a></li>
+                  {% endif %}
+                  <li><a class="dropdown-item" href="{{ url_for('dashboard.profile') }}"><i class="bi bi-person-bounding-box me-2"></i> My Profile</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('items.my_reports') }}"><i class="bi bi-journal-text me-2"></i> My Reports</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('claims.my_claims') }}"><i class="bi bi-file-earmark-check me-2"></i> My Claims</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('auth.change_password') }}"><i class="bi bi-key me-2"></i> Change Password</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i> Sign Out</a></li>
+                </ul>
+              </div>
+
+            {% else %}
+              <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-sm px-3">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+              </a>
+
+              <div class="dropdown">
+                <button class="btn btn-primary-cc btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-person-plus me-1"></i> Register
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                  <li><a class="dropdown-item" href="{{ url_for('auth.register_student') }}"><i class="bi bi-mortarboard me-2 text-primary"></i> Student Registration</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('auth.register_staff') }}"><i class="bi bi-person-badge me-2 text-success"></i> Faculty / Staff Registration</a></li>
+                </ul>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Flash Messages -->
+  <div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show shadow-sm" role="alert">
+            {% if category == 'success' %}
+              <i class="bi bi-check-circle-fill me-2 fs-5 align-middle"></i>
+            {% elif category == 'danger' or category == 'error' %}
+              <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i>
+            {% elif category == 'warning' %}
+              <i class="bi bi-exclamation-circle-fill me-2 fs-5 align-middle"></i>
+            {% else %}
+              <i class="bi bi-info-circle-fill me-2 fs-5 align-middle"></i>
+            {% endif %}
+            <span class="align-middle">{{ message }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main Content Block -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="cc-footer">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="cc-brand-badge"><i class="bi bi-shield-check"></i></span>
+            <span class="text-white fw-bold fs-5">CampusConnect</span>
+          </div>
+          <p class="small text-muted mb-3">
+            The university's centralized digital platform for recovering lost property, coordinating returns, and safeguarding campus belongings with verified claim management.
+          </p>
+          <div class="small text-muted">
+            <i class="bi bi-geo-alt-fill text-primary me-1"></i> Security Control Center, Ground Floor Block A
+          </div>
+        </div>
+
+        <div class="col-lg-2 col-md-6">
+          <h6 class="text-white fw-bold mb-3">Explore</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="{{ url_for('items.lost_items') }}"><i class="bi bi-chevron-right text-primary me-1"></i> Lost Items</a></li>
+            <li><a href="{{ url_for('items.found_items') }}"><i class="bi bi-chevron-right text-primary me-1"></i> Found Items</a></li>
+            <li><a href="{{ url_for('items.report_lost') }}"><i class="bi bi-chevron-right text-primary me-1"></i> Report Lost</a></li>
+            <li><a href="{{ url_for('items.report_found') }}"><i class="bi bi-chevron-right text-primary me-1"></i> Report Found</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+          <h6 class="text-white fw-bold mb-3">Campus Resources</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="{{ url_for('main.about') }}"><i class="bi bi-chevron-right text-primary me-1"></i> About the Portal</a></li>
+            <li><a href="{{ url_for('main.help') }}"><i class="bi bi-chevron-right text-primary me-1"></i> How It Works &amp; FAQ</a></li>
+            <li><a href="{{ url_for('main.privacy') }}"><i class="bi bi-chevron-right text-primary me-1"></i> Privacy Policy</a></li>
+            <li><a href="{{ url_for('main.terms') }}"><i class="bi bi-chevron-right text-primary me-1"></i> Terms of Use</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+          <h6 class="text-white fw-bold mb-3">Contact Support</h6>
+          <p class="small text-muted mb-2">Have questions about an item or need assistance with a claim?</p>
+          <div class="small mb-1"><i class="bi bi-envelope text-primary me-2"></i>support@campusconnect.edu</div>
+          <div class="small mb-3"><i class="bi bi-telephone text-primary me-2"></i>Campus Security Ext. 2100</div>
+          <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-clock me-1"></i> Open 24/7 for Reports</span>
+        </div>
+      </div>
+
+      <hr class="cc-footer-divider">
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-muted">
+        <div>&copy; {{ current_year }} CampusConnect. All rights reserved. Secure Campus Property Recovery System.</div>
+        <div class="mt-2 mt-md-0">
+          <span class="badge bg-dark border border-secondary text-secondary">v1.0.0 Production</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5.3 Bundle JS with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <!-- Application JS -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

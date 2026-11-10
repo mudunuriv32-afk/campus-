@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Review Claim — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ url_for('items.item_details', item_id=item.id) }}">{{ item.title }}</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Review Claim #{{ claim.id }}</li>
+        </ol>
+      </nav>
+
+      <div class="card p-4 p-md-5 shadow-lg border-0 rounded-4 bg-white">
+        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+          <div class="cc-stat-icon amber"><i class="bi bi-person-check-fill fs-3"></i></div>
+          <div>
+            <h3 class="fw-bold mb-0">Claim Review &amp; Handover Decision</h3>
+            <p class="text-muted small mb-0">Carefully verify the claimant's answers against your item's features</p>
+          </div>
+        </div>
+
+        <!-- Claimed Item Info -->
+        <div class="card p-3 shadow-sm border rounded-3 bg-light mb-4">
+          <div class="row g-2 align-items-center">
+            <div class="col-auto">
+              <span class="badge {% if item.is_lost %}badge-lost{% else %}badge-found{% endif %} fs-6">{{ item.item_type }}</span>
+            </div>
+            <div class="col">
+              <h5 class="fw-bold mb-0">{{ item.title }}</h5>
+              <div class="small text-muted">{{ item.location }} • Found on {{ item.incident_date.strftime('%b %d, %Y') }}</div>
+            </div>
+            <div class="col-auto">
+              <a href="{{ url_for('items.item_details', item_id=item.id) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                View Listing <i class="bi bi-box-arrow-up-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Claimant Profile -->
+        <div class="card p-3 border rounded-3 mb-4">
+          <h6 class="fw-bold text-muted small text-uppercase mb-2">Claimant Profile</h6>
+          <div class="row g-2">
+            <div class="col-sm-6">
+              <span class="small text-muted d-block">Full Name</span>
+              <strong class="text-dark">{{ claim.claimant.full_name }}</strong>
+            </div>
+            <div class="col-sm-6">
+              <span class="small text-muted d-block">College ID / PRN</span>
+              <strong class="text-dark">{{ claim.claimant.campus_id }}</strong>
+            </div>
+            <div class="col-sm-6">
+              <span class="small text-muted d-block">College Email</span>
+              <span class="text-dark">{{ claim.claimant.email }}</span>
+            </div>
+            <div class="col-sm-6">
+              <span class="small text-muted d-block">Department &amp; Year</span>
+              <span class="text-dark">{{ claim.claimant.department.name if claim.claimant.department else 'N/A' }} ({{ claim.claimant.designation_or_year }})</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Claimant Evidence -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-dark">Why they claim it's theirs:</h6>
+          <div class="p-3 bg-light rounded-3 mb-3 text-dark small leading-relaxed">
+            {{ claim.claim_description }}
+          </div>
+
+          <h6 class="fw-bold text-dark">Secret / Verifiable Details Provided:</h6>
+          <div class="p-3 bg-light rounded-3 mb-3 text-dark small leading-relaxed border-start border-4 border-primary">
+            {{ claim.verification_details }}
+          </div>
+
+          {% if claim.proof_image %}
+            <h6 class="fw-bold text-dark">Uploaded Proof Photo:</h6>
+            <div class="p-2 border rounded-3 mb-3 text-center bg-light">
+              <img src="{{ url_for('static', filename='uploads/' + claim.proof_image) }}" alt="Proof photo" class="img-fluid rounded" style="max-height: 280px; object-fit: contain;">
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Decision Form -->
+        {% if claim.status == 'PENDING' %}
+          <div class="card p-4 border rounded-4 bg-white shadow-sm">
+            <h5 class="fw-bold mb-3">Review Decision</h5>
+            <form method="POST" action="{{ url_for('claims.review_claim', claim_id=claim.id) }}">
+              {{ form.hidden_tag() }}
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-muted">{{ form.action.label }}</label>
+                {{ form.action(class="form-select") }}
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-muted">{{ form.remarks.label }}</label>
+                {{ form.remarks(class="form-control" + (" is-invalid" if form.remarks.errors else ""), rows="3", placeholder="If approving, provide collection time & safe campus location (e.g. Security Center Block A). If rejecting, specify reason.") }}
+                {% for error in form.remarks.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <button type="submit" class="btn btn-primary-cc w-100 py-2 fs-6 shadow-sm" data-confirm="Are you sure you want to submit this decision? Approving will mark the item as RETURNED.">
+                <i class="bi bi-shield-check me-1"></i> Submit Official Review Decision
+              </button>
+            </form>
+          </div>
+        {% else %}
+          <div class="alert alert-secondary text-center py-3 mb-0">
+            <strong>Claim Already Reviewed:</strong> Status is {{ claim.status }}.
+            <div class="small mt-1 text-muted">Reviewed on {{ claim.reviewed_at.strftime('%b %d, %Y') if claim.reviewed_at else 'N/A' }}</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% block title %}Administrator Oversight Portal — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Admin Header -->
+  <div class="card p-4 shadow-sm border-0 rounded-4 bg-navy-dark text-white mb-4" style="background: linear-gradient(135deg, var(--cc-navy-primary), var(--cc-navy-dark));">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <span class="badge bg-danger px-3 py-1 mb-2 fw-semibold">
+          <i class="bi bi-shield-lock-fill me-1"></i> Root Administration &amp; Governance
+        </span>
+        <h2 class="fw-bold mb-1 text-white">Campus Oversight Portal</h2>
+        <p class="text-slate-300 small mb-0">System health, institutional compliance, audit trails, and user moderation</p>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('admin.password_reset') }}" class="btn btn-warning btn-sm fw-semibold shadow-sm">
+          <i class="bi bi-key-fill me-1"></i> Password Reset Portal
+        </a>
+        <a href="{{ url_for('admin.students') }}" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-mortarboard me-1"></i> Students
+        </a>
+        <a href="{{ url_for('admin.users') }}" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-people me-1"></i> Users
+        </a>
+        <a href="{{ url_for('admin.items') }}" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-collection me-1"></i> Items
+        </a>
+        <a href="{{ url_for('admin.claims') }}" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-file-earmark-check me-1"></i> Claims
+        </a>
+        <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-journal-text me-1"></i> Audit Logs
+        </a>
+        <a href="{{ url_for('admin.settings') }}" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-gear me-1"></i> Settings
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Metrics -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="cc-stat-card p-3">
+        <div class="cc-stat-icon blue"><i class="bi bi-people-fill"></i></div>
+        <div>
+          <div class="cc-stat-val">{{ stats.total_users }}</div>
+          <div class="cc-stat-label">Total Users</div>
+          <div class="small text-muted" style="font-size: 0.75rem;">{{ stats.total_students }} students, {{ stats.total_staff }} staff</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="cc-stat-card p-3">
+        <div class="cc-stat-icon amber"><i class="bi bi-person-check"></i></div>
+        <div>
+          <div class="cc-stat-val text-warning">{{ stats.pending_staff_approvals }}</div>
+          <div class="cc-stat-label">Pending Staff Review</div>
+          <div class="small text-muted" style="font-size: 0.75rem;">Awaiting verification</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="cc-stat-card p-3">
+        <div class="cc-stat-icon rose"><i class="bi bi-exclamation-octagon"></i></div>
+        <div>
+          <div class="cc-stat-val text-danger">{{ stats.total_lost }}</div>
+          <div class="cc-stat-label">Lost Reports</div>
+          <div class="small text-muted" style="font-size: 0.75rem;">Total submitted</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="cc-stat-card p-3">
+        <div class="cc-stat-icon green"><i class="bi bi-box-seam"></i></div>
+        <div>
+          <div class="cc-stat-val text-success">{{ stats.total_found }}</div>
+          <div class="cc-stat-label">Found Reports</div>
+          <div class="small text-muted" style="font-size: 0.75rem;">Total surrendered</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4">
+      <div class="cc-stat-card p-3">
+        <div class="cc-stat-icon amber"><i class="bi bi-clock-history"></i></div>
+        <div>
+          <div class="cc-stat-val text-warning">{{ stats.pending_claims }}</div>
+          <div class="cc-stat-label">Pending Claims</div>
+          <div class="small text-muted" style="font-size: 0.75rem;">Requires verification</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4">
+      <div class="cc-stat-card p-3">
+        <div class="cc-stat-icon green"><i class="bi bi-patch-check-fill"></i></div>
+        <div>
+          <div class="cc-stat-val text-success">{{ stats.returned_items }}</div>
+          <div class="cc-stat-label">Returned Belongings</div>
+          <div class="small text-muted" style="font-size: 0.75rem;">Successfully resolved</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="cc-stat-card p-3">
+        <div class="cc-stat-icon rose"><i class="bi bi-flag-fill"></i></div>
+        <div>
+          <div class="cc-stat-val text-danger">{{ stats.flagged_reports }}</div>
+          <div class="cc-stat-label">Flagged Reports</div>
+          <div class="small text-muted" style="font-size: 0.75rem;">Moderation required</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart.js Visual Analytics Row -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <div class="card p-4 shadow-sm border-0 rounded-4 bg-white h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0 text-navy-primary">
+            <i class="bi bi-bar-chart-fill text-primary me-2"></i>Items by Category
+          </h5>
+          <span class="badge bg-light text-muted border">Platform Breakdown</span>
+        </div>
+        <div style="position: relative; height: 260px;">
+          <canvas id="categoryChartCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card p-4 shadow-sm border-0 rounded-4 bg-white h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0 text-navy-primary">
+            <i class="bi bi-pie-chart-fill text-success me-2"></i>Resolution Status
+          </h5>
+          <span class="badge bg-light text-muted border">Lifecycle Distribution</span>
+        </div>
+        <div style="position: relative; height: 260px;" class="d-flex justify-content-center">
+          <canvas id="statusChartCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Quick Management Tiles -->
+    <div class="col-lg-5">
+      <div class="card p-4 shadow-sm border-0 rounded-4 bg-white mb-4">
+        <h5 class="fw-bold mb-3 text-navy-primary">Administrative Controls</h5>
+        <div class="list-group list-group-flush">
+          <a href="{{ url_for('admin.password_reset') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-2">
+            <div>
+              <div class="fw-bold text-danger"><i class="bi bi-key-fill text-danger me-2"></i> Password Reset Portal</div>
+              <div class="small text-muted">Generate secure 15m temporary passwords for students</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted"></i>
+          </a>
+
+          <a href="{{ url_for('admin.students') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-2">
+            <div>
+              <div class="fw-bold"><i class="bi bi-mortarboard text-primary me-2"></i> Student Management</div>
+              <div class="small text-muted">Lookup student records by College ID and view reports/claims</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted"></i>
+          </a>
+
+          <a href="{{ url_for('admin.users') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-2">
+            <div>
+              <div class="fw-bold"><i class="bi bi-person-gear text-primary me-2"></i> User Governance</div>
+              <div class="small text-muted">Activate, deactivate, change roles, approve staff</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted"></i>
+          </a>
+
+          <a href="{{ url_for('admin.items') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-2">
+            <div>
+              <div class="fw-bold"><i class="bi bi-shield-x text-danger me-2"></i> Item Moderation</div>
+              <div class="small text-muted">Close listings, delete inappropriate items, unflag reports</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted"></i>
+          </a>
+
+          <a href="{{ url_for('admin.claims') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-2">
+            <div>
+              <div class="fw-bold"><i class="bi bi-award text-success me-2"></i> Claims Oversight</div>
+              <div class="small text-muted">Review, approve, or reject claims with admin override</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted"></i>
+          </a>
+
+          <a href="{{ url_for('admin.categories') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-2">
+            <div>
+              <div class="fw-bold"><i class="bi bi-tags text-info me-2"></i> Category Management</div>
+              <div class="small text-muted">Create or modify campus property categories</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted"></i>
+          </a>
+
+          <a href="{{ url_for('admin.settings') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 px-2">
+            <div>
+              <div class="fw-bold"><i class="bi bi-sliders text-secondary me-2"></i> Platform Settings</div>
+              <div class="small text-muted">Configure campus name, contact desk, and retention rules</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Audit Logs -->
+    <div class="col-lg-7">
+      <div class="card p-4 shadow-sm border-0 rounded-4 bg-white mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0 text-navy-primary"><i class="bi bi-journal-text me-2 text-primary"></i> Recent Audit Trail</h5>
+          <a href="{{ url_for('admin.audit_logs') }}" class="small text-primary text-decoration-none">Full Log &rarr;</a>
+        </div>
+
+        {% if recent_logs %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+              <thead class="table-light">
+                <tr>
+                  <th>Action</th>
+                  <th>Actor</th>
+                  <th>Target</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for log in recent_logs %}
+                  <tr>
+                    <td>
+                      <span class="badge bg-light text-dark border fw-semibold">{{ log.action }}</span>
+                    </td>
+                    <td>
+                      <span class="text-muted">{{ log.user.email if log.user else 'System' }}</span>
+                    </td>
+                    <td class="text-truncate" style="max-width: 180px;" title="{{ log.details }}">
+                      {{ log.details or '-' }}
+                    </td>
+                    <td class="text-muted">{{ log.created_at.strftime('%b %d, %H:%M') }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted small">
+            No audit events recorded yet.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js Library and Initialization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Category Distribution Bar Chart
+  const categoryData = {{ category_chart|tojson }};
+  const catCtx = document.getElementById('categoryChartCanvas');
+  if (catCtx && categoryData && categoryData.labels) {
+    new Chart(catCtx, {
+      type: 'bar',
+      data: {
+        labels: categoryData.labels,
+        datasets: [{
+          label: 'Total Items',
+          data: categoryData.data,
+          backgroundColor: '#2563eb',
+          borderRadius: 6,
+          maxBarThickness: 32
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { precision: 0 }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+
+  // System Status Doughnut Chart
+  const statusData = {{ status_chart|tojson }};
+  const statusCtx = document.getElementById('statusChartCanvas');
+  if (statusCtx && statusData && statusData.labels) {
+    new Chart(statusCtx, {
+      type: 'doughnut',
+      data: {
+        labels: statusData.labels,
+        datasets: [{
+          data: statusData.data,
+          backgroundColor: [
+            '#dc2626', // Lost: red
+            '#16a34a', // Found: green
+            '#f59e0b', // Pending claims: amber
+            '#059669'  // Returned: emerald
+          ],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { boxWidth: 12, font: { size: 11 } }
+          }
+        },
+        cutout: '65%'
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

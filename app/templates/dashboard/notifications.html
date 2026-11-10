@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Notifications — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-0">Notifications Inbox</h2>
+      <p class="text-muted small mb-0">Real-time alerts regarding your lost and found claims, updates, and moderation</p>
+    </div>
+
+    {% if notifications %}
+      <form action="{{ url_for('dashboard.mark_all_notifications_read') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-check2-all me-1"></i> Mark All as Read
+        </button>
+      </form>
+    {% endif %}
+  </div>
+
+  {% if notifications %}
+    <div class="card shadow-sm border-0 bg-white rounded-4 overflow-hidden mb-4">
+      <div class="list-group list-group-flush">
+        {% for n in notifications %}
+          <div class="list-group-item p-3 {% if not n.is_read %}notification-unread{% endif %} d-flex justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-start gap-3">
+              <div class="cc-stat-icon {% if 'APPROVED' in n.notification_type %}green{% elif 'REJECTED' in n.notification_type %}rose{% elif 'SUBMITTED' in n.notification_type %}amber{% else %}blue{% endif %} flex-shrink-0" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                {% if 'APPROVED' in n.notification_type %}
+                  <i class="bi bi-patch-check-fill"></i>
+                {% elif 'REJECTED' in n.notification_type %}
+                  <i class="bi bi-x-circle-fill"></i>
+                {% elif 'SUBMITTED' in n.notification_type %}
+                  <i class="bi bi-file-earmark-text"></i>
+                {% else %}
+                  <i class="bi bi-bell-fill"></i>
+                {% endif %}
+              </div>
+
+              <div>
+                <div class="fw-bold text-dark">{{ n.title }}</div>
+                <div class="text-muted small mb-1">{{ n.message }}</div>
+                <div class="small text-muted" style="font-size: 0.75rem;">
+                  <i class="bi bi-clock me-1"></i> {{ n.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+              {% if n.link_url %}
+                <a href="{{ n.link_url }}" class="btn btn-primary-cc btn-sm">
+                  View <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+              {% endif %}
+
+              {% if not n.is_read %}
+                <form action="{{ url_for('dashboard.mark_notification_read', notif_id=n.id) }}" method="POST" class="d-inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-outline-secondary btn-sm" title="Mark as read">
+                    <i class="bi bi-check2"></i>
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+      <nav aria-label="Page navigation" class="d-flex justify-content-center">
+        <ul class="pagination">
+          <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('dashboard.notifications', page=pagination.prev_num) }}">Previous</a>
+          </li>
+          {% for p in pagination.iter_pages() %}
+            {% if p %}
+              <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('dashboard.notifications', page=p) }}">{{ p }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+          <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('dashboard.notifications', page=pagination.next_num) }}">Next</a>
+          </li>
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <div class="cc-empty-state my-4">
+      <i class="bi bi-bell-slash cc-empty-icon"></i>
+      <h4 class="fw-bold">No Notifications Yet</h4>
+      <p class="text-muted small">You will receive alerts here whenever someone claims your item or reviews your submission.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

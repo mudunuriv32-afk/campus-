@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }} — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+      {% if item.is_lost %}
+        <li class="breadcrumb-item"><a href="{{ url_for('items.lost_items') }}">Lost Items</a></li>
+      {% else %}
+        <li class="breadcrumb-item"><a href="{{ url_for('items.found_items') }}">Found Items</a></li>
+      {% endif %}
+      <li class="breadcrumb-item active text-truncate" style="max-width: 300px;">{{ item.title }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <!-- Left Column: Item Image & Main Info -->
+    <div class="col-lg-8">
+      <div class="card p-4 shadow-sm border-0 rounded-4 bg-white mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <div class="d-flex align-items-center gap-2">
+            {% if item.is_lost %}
+              <span class="badge badge-lost fs-6 px-3 py-1">LOST</span>
+            {% else %}
+              <span class="badge badge-found fs-6 px-3 py-1">FOUND</span>
+            {% endif %}
+
+            {% if item.status == 'OPEN' %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Active / Open</span>
+            {% elif item.status == 'CLAIM_PENDING' %}
+              <span class="badge badge-pending px-2 py-1">Claim Under Review</span>
+            {% elif item.status == 'RETURNED' %}
+              <span class="badge badge-returned px-2 py-1"><i class="bi bi-patch-check-fill me-1"></i> Safely Returned</span>
+            {% elif item.status == 'CLOSED' %}
+              <span class="badge bg-secondary px-2 py-1">Closed Listing</span>
+            {% elif item.status == 'FLAGGED' %}
+              <span class="badge badge-flagged px-2 py-1"><i class="bi bi-flag-fill me-1"></i> Under Moderation</span>
+            {% endif %}
+          </div>
+
+          <div class="small text-muted">
+            <i class="bi bi-clock me-1"></i> Reported {{ item.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+          </div>
+        </div>
+
+        <h2 class="fw-bold text-dark mb-3">{{ item.title }}</h2>
+
+        <!-- Image Display -->
+        <div class="cc-card-img-wrap rounded-3 mb-4" style="height: 380px;">
+          {% if item.primary_image %}
+            <img src="{{ url_for('static', filename='uploads/' + item.primary_image) }}" alt="{{ item.title }}" style="object-fit: contain; max-height: 100%;">
+          {% else %}
+            <div class="text-center text-muted">
+              <i class="bi {{ item.category.icon if item.category else 'bi-box' }} display-1"></i>
+              <div class="small mt-2">No photo was uploaded with this listing</div>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Description -->
+        <h5 class="fw-bold mb-2">Description</h5>
+        <p class="text-muted leading-relaxed mb-4" style="white-space: pre-line;">{{ item.description }}</p>
+
+        <!-- Private Identifying details (only shown to reporter or admin) -->
+        {% if current_user and (current_user.id == item.reporter_id or current_user.is_admin) %}
+          {% if item.identifying_features %}
+            <div class="alert alert-warning py-3 px-3 rounded-3 mb-4">
+              <div class="fw-bold text-dark mb-1"><i class="bi bi-shield-lock-fill me-1"></i> Private Verification Answers (Visible only to you and moderators):</div>
+              <div class="small text-dark">{{ item.identifying_features }}</div>
+            </div>
+          {% endif %}
+        {% endif %}
+
+        <!-- Metadata Grid -->
+        <div class="row g-3 p-3 bg-light rounded-3">
+          <div class="col-sm-6">
+            <div class="small text-muted fw-semibold">Category</div>
+            <div class="fw-bold text-dark"><i class="bi {{ item.category.icon if item.category else 'bi-tag' }} text-primary me-1"></i> {{ item.category.name if item.category else 'General' }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="small text-muted fw-semibold">Campus Location</div>
+            <div class="fw-bold text-dark"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ item.location }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="small text-muted fw-semibold">Date of Incident</div>
+            <div class="fw-bold text-dark"><i class="bi bi-calendar-event text-info me-1"></i> {{ item.incident_date.strftime('%A, %B %d, %Y') }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="small text-muted fw-semibold">Preferred Contact</div>
+            <div class="fw-bold text-dark">
+              {% if item.contact_preference == 'PHONE' and current_user %}
+                <i class="bi bi-telephone-fill text-success me-1"></i> {{ item.reporter.phone }}
+              {% elif item.contact_preference == 'EMAIL' and current_user %}
+                <i class="bi bi-envelope-fill text-primary me-1"></i> {{ item.reporter.email }}
+              {% else %}
+                <i class="bi bi-chat-dots-fill text-primary me-1"></i> In-App Portal Claims Only
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Matching Suggestions Section (Phase 4 enhancement) -->
+      {% if matches %}
+        <div class="card p-4 shadow-sm border-0 rounded-4 bg-white mb-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="cc-stat-icon blue" style="width: 36px; height: 36px; font-size: 1.1rem;"><i class="bi bi-stars"></i></div>
+            <div>
+              <h5 class="fw-bold mb-0">Possible Match Suggestions</h5>
+              <div class="small text-muted">Potential matching reports found by our campus correlation engine</div>
+            </div>
+          </div>
+
+          <div class="alert alert-info py-2 px-3 small mb-3">
+            <i class="bi bi-info-circle me-1"></i> <strong>Note:</strong> These suggestions are algorithmic potential matches based on date, category, and campus landmarks—not verified matches.
+          </div>
+
+          {% for m in matches %}
+            <div class="cc-match-card">
+              <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <div>
+                  <span class="badge {% if m.item.is_lost %}badge-lost{% else %}badge-found{% endif %} me-1">
+                    {{ m.item.item_type }}
+                  </span>
+                  <a href="{{ url_for('items.item_details', item_id=m.item.id) }}" class="fw-bold text-decoration-none text-dark">
+                    {{ m.item.title }}
+                  </a>
+                </div>
+                <span class="cc-match-score">{{ m.score }}% Match</span>
+              </div>
+              <p class="small text-muted mb-2 text-truncate">{{ m.item.description }}</p>
+              <div class="d-flex flex-wrap gap-2 small">
+                {% for r in m.reasons %}
+                  <span class="badge bg-white text-primary border"><i class="bi bi-check2 text-success me-1"></i>{{ r }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column: Actions & Reporter Info -->
+    <div class="col-lg-4">
+      <!-- Action Card -->
+      <div class="card p-4 shadow-sm border-0 rounded-4 bg-white mb-4">
+        <h5 class="fw-bold mb-3">Item Actions</h5>
+
+        {% if item.status == 'RETURNED' %}
+          <div class="alert alert-success text-center py-3 mb-3">
+            <i class="bi bi-patch-check-fill fs-2 d-block mb-1"></i>
+            <strong>This item has been returned!</strong><br>
+            <span class="small">The claim was verified and the item was safely returned to its owner.</span>
+          </div>
+        {% elif item.status == 'CLOSED' %}
+          <div class="alert alert-secondary text-center py-3 mb-3">
+            <i class="bi bi-archive-fill fs-2 d-block mb-1"></i>
+            <strong>This listing is closed.</strong>
+          </div>
+        {% else %}
+          <!-- User is NOT reporter -->
+          {% if not current_user or current_user.id != item.reporter_id %}
+            <div class="d-grid gap-2 mb-3">
+              <a href="{{ url_for('claims.request_claim', item_id=item.id) }}" class="btn btn-success py-2 fw-semibold">
+                <i class="bi bi-shield-check me-1"></i> Request Claim This Item
+              </a>
+            </div>
+            <p class="small text-muted text-center mb-0">
+              You will be prompted to submit identifying proof that confirms your ownership.
+            </p>
+          {% endif %}
+
+          <!-- User IS Reporter or Admin -->
+          {% if current_user and (current_user.id == item.reporter_id or current_user.is_admin) %}
+            <div class="d-grid gap-2 mb-3">
+              <a href="{{ url_for('items.edit_item', item_id=item.id) }}" class="btn btn-outline-primary py-2 fw-semibold">
+                <i class="bi bi-pencil-square me-1"></i> Edit Listing Details
+              </a>
+              <form action="{{ url_for('items.close_item', item_id=item.id) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-outline-secondary w-100 py-2 fw-semibold" data-confirm="Are you sure you want to close this listing?">
+                  <i class="bi bi-check2-circle me-1"></i> Mark as Resolved / Close
+                </button>
+              </form>
+            </div>
+          {% endif %}
+        {% endif %}
+
+        <!-- Moderation / Flag Option -->
+        {% if current_user and current_user.id != item.reporter_id %}
+          <hr class="my-3">
+          <button type="button" class="btn btn-link text-muted small p-0 text-decoration-none w-100 text-center" data-bs-toggle="modal" data-bs-target="#flagModal">
+            <i class="bi bi-flag me-1"></i> Report inappropriate listing
+          </button>
+        {% endif %}
+      </div>
+
+      <!-- Reporter Card -->
+      <div class="card p-4 shadow-sm border-0 rounded-4 bg-white mb-4">
+        <h6 class="fw-bold text-muted small text-uppercase mb-3">Reported By</h6>
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="cc-stat-icon blue" style="width: 48px; height: 48px; font-size: 1.4rem;">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <div>
+            <div class="fw-bold text-dark">{{ item.reporter.full_name }}</div>
+            <div class="small text-muted">{{ item.reporter.department.name if item.reporter.department else 'Campus Member' }}</div>
+            <span class="badge bg-light text-secondary border small">{{ item.reporter.role.name|capitalize }}</span>
+          </div>
+        </div>
+
+        <div class="small text-muted border-top pt-3">
+          <i class="bi bi-shield-shaded text-primary me-1"></i> Verified college member registered since {{ item.reporter.created_at.strftime('%b %Y') }}.
+        </div>
+      </div>
+
+      <!-- Security Desk Reminder Card -->
+      <div class="card p-3 shadow-sm border rounded-3 bg-light">
+        <div class="d-flex gap-2">
+          <i class="bi bi-shield-exclamation text-primary fs-5 flex-shrink-0"></i>
+          <div class="small text-muted">
+            <strong>Campus Safety Tip:</strong> Never agree to meet unverified individuals in secluded places. Always use the 24/7 Security Control Center at Block A for property exchange.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Flag Report Modal -->
+{% if current_user %}
+<div class="modal fade" id="flagModal" tabindex="-1" aria-labelledby="flagModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="{{ url_for('items.flag_item', item_id=item.id) }}" method="POST">
+        {{ flag_form.hidden_tag() }}
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="flagModalLabel"><i class="bi bi-flag text-danger me-1"></i> Report Listing</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-muted">If this listing contains offensive content, false claims, personal insults, or spam, please explain the issue for our campus security moderators.</p>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-muted">Reason for Reporting</label>
+            {{ flag_form.reason(class="form-control", rows="3", placeholder="Explain the violation...") }}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger btn-sm">Submit Report</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

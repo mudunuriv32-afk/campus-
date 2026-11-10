@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Terms & Conditions — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Terms &amp; Conditions</li>
+        </ol>
+      </nav>
+
+      <h1 class="fw-bold mb-3">Terms of Service &amp; Campus Policy</h1>
+      <p class="text-muted small mb-4">Effective: Academic Year 2026</p>
+
+      <div class="card p-4 shadow-sm border-0 bg-white rounded-4 leading-relaxed">
+        <h5 class="fw-bold text-primary">1. Acceptable Campus Use</h5>
+        <p class="small text-muted">
+          CampusConnect is strictly designated for registered college students, faculty, and authorized campus staff. Users agree to submit accurate, truthful, and lawful descriptions of lost or found belongings. Submitting fraudulent reports, spam, abusive language, or unauthorized promotional material is prohibited and subject to institutional disciplinary action.
+        </p>
+
+        <h5 class="fw-bold text-primary mt-3">2. False Claims &amp; Theft Policy</h5>
+        <p class="small text-muted">
+          Submitting false claim requests on items that do not belong to you constitutes theft of property under institutional codes of conduct and local legal statutes. All claim requests are permanently tied to verified student IDs and logged in audit trails.
+        </p>
+
+        <h5 class="fw-bold text-primary mt-3">3. Property Handover Safety</h5>
+        <p class="small text-muted">
+          Users are advised to conduct in-person property handovers during daylight hours or at designated campus locations such as the Campus Security Control Center, Library Information Desk, or Academic Department offices.
+        </p>
+
+        <h5 class="fw-bold text-primary mt-3">4. Unclaimed Property Retention</h5>
+        <p class="small text-muted">
+          Found property logged on CampusConnect and surrendered to campus custody will be retained in accordance with university policy (90 calendar days) before being donated or disposed of per institutional guidelines.
+        </p>
+
+        <h5 class="fw-bold text-primary mt-3">5. Disclaimer of Liability</h5>
+        <p class="small text-muted mb-0">
+          While CampusConnect provides the technological infrastructure to connect campus community members, the university cannot guarantee the condition or recovery of all lost items.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

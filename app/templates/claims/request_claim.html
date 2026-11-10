@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Submit Claim Request — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ url_for('items.item_details', item_id=item.id) }}">{{ item.title }}</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Claim Request</li>
+        </ol>
+      </nav>
+
+      <!-- Target Item Card -->
+      <div class="card p-3 shadow-sm border-0 rounded-4 bg-light mb-4">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width: 70px; height: 70px; border-radius: 8px; overflow: hidden; background: #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            {% if item.primary_image %}
+              <img src="{{ url_for('static', filename='uploads/' + item.primary_image) }}" alt="{{ item.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+              <i class="bi {{ item.category.icon if item.category else 'bi-box' }} fs-2 text-muted"></i>
+            {% endif %}
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge {% if item.is_lost %}badge-lost{% else %}badge-found{% endif %}">{{ item.item_type }}</span>
+              <span class="small text-muted">{{ item.category.name if item.category else 'General' }}</span>
+            </div>
+            <h5 class="fw-bold text-dark mb-0">{{ item.title }}</h5>
+            <div class="small text-muted"><i class="bi bi-geo-alt text-danger me-1"></i> {{ item.location }} • {{ item.incident_date.strftime('%b %d, %Y') }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4 p-md-5 shadow-lg border-0 rounded-4 bg-white">
+        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+          <div class="cc-stat-icon green"><i class="bi bi-shield-check fs-3"></i></div>
+          <div>
+            <h3 class="fw-bold mb-0">Claim Ownership Verification</h3>
+            <p class="text-muted small mb-0">Submit authentic verification proof to claim this item from its reporter</p>
+          </div>
+        </div>
+
+        <div class="alert alert-warning py-2 px-3 small mb-4">
+          <i class="bi bi-shield-exclamation me-1"></i> <strong>Integrity Notice:</strong> Submitting fraudulent claims is a campus disciplinary offense. Please provide specific information only the genuine owner would possess.
+        </div>
+
+        <form method="POST" action="{{ url_for('claims.request_claim', item_id=item.id) }}" enctype="multipart/form-data">
+          {{ form.hidden_tag() }}
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold text-muted">{{ form.claim_description.label }} <span class="text-danger">*</span></label>
+            {{ form.claim_description(class="form-control" + (" is-invalid" if form.claim_description.errors else ""), rows="3", placeholder="Summarize when and where you lost this item and why you believe this listing is yours...") }}
+            {% for error in form.claim_description.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold text-muted">{{ form.verification_details.label }} <span class="text-danger">*</span></label>
+            {{ form.verification_details(class="form-control" + (" is-invalid" if form.verification_details.errors else ""), rows="4", placeholder="Specify secret/exact verifiable proof (e.g. device lock screen passcode or wallpaper description, exact serial number, private stickers, cash denominations, brand of inner contents)...") }}
+            <div class="form-text small">This information is sent directly to the item reporter and verified moderators.</div>
+            {% for error in form.verification_details.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold text-muted">{{ form.proof_image.label }}</label>
+            {{ form.proof_image(class="form-control" + (" is-invalid" if form.proof_image.errors else ""), accept="image/png,image/jpeg,image/webp") }}
+            <div class="form-text small">Optional photo proof (purchase receipt, photo of item before it was lost, student warranty document).</div>
+            <div id="proof_image-preview"></div>
+            {% for error in form.proof_image.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary-cc flex-grow-1 py-2 fs-6 shadow-sm">
+              <i class="bi bi-send me-1"></i> Submit Verified Claim Request
+            </button>
+            <a href="{{ url_for('items.item_details', item_id=item.id) }}" class="btn btn-outline-secondary py-2">
+              Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

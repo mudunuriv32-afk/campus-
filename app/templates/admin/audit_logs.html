@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}System Audit Logs — CampusConnect Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small mb-1">
+          <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+          <li class="breadcrumb-item active">Audit Trail</li>
+        </ol>
+      </nav>
+      <h2 class="fw-bold mb-0">System Audit Trail &amp; Governance</h2>
+      <p class="text-muted small mb-0">Immutable records of all administrative actions, claim approvals, and security events</p>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="card p-3 shadow-sm border-0 bg-white rounded-3 mb-4">
+    <form method="GET" action="{{ url_for('admin.audit_logs') }}" class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" name="action" value="{{ action_filter }}" class="form-control border-start-0 ps-0" placeholder="Filter by action (e.g. LOGIN, CLAIM_APPROVED, MODERATED)...">
+        </div>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary-cc w-100">Filter</button>
+        {% if action_filter %}
+          <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-secondary" title="Clear"><i class="bi bi-x-lg"></i></a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Logs Table -->
+  {% if logs %}
+    <div class="card shadow-sm border-0 bg-white rounded-4 overflow-hidden mb-4">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 font-monospace small">
+          <thead class="table-light text-uppercase">
+            <tr>
+              <th scope="col" class="ps-4">Timestamp</th>
+              <th scope="col">Action Event</th>
+              <th scope="col">Actor / User</th>
+              <th scope="col">IP Address</th>
+              <th scope="col">Target</th>
+              <th scope="col" class="pe-4">Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in logs %}
+              <tr>
+                <td class="ps-4 text-muted">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>
+                  <span class="badge {% if 'APPROVED' in log.action %}bg-success-subtle text-success border border-success-subtle{% elif 'REJECTED' in log.action or 'DEACTIVATED' in log.action %}bg-danger-subtle text-danger border border-danger-subtle{% else %}bg-light text-dark border{% endif %}">
+                    {{ log.action }}
+                  </span>
+                </td>
+                <td>
+                  {% if log.user %}
+                    <span class="text-primary">{{ log.user.email }}</span>
+                  {% else %}
+                    <span class="text-muted">Anonymous/System</span>
+                  {% endif %}
+                </td>
+                <td class="text-muted">{{ log.ip_address or '-' }}</td>
+                <td>
+                  {% if log.target_type %}
+                    <span class="badge bg-secondary-subtle text-secondary">{{ log.target_type }} #{{ log.target_id or '' }}</span>
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td class="pe-4 text-truncate" style="max-width: 320px;" title="{{ log.details }}">
+                  {{ log.details or '-' }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+      <nav aria-label="Page navigation" class="d-flex justify-content-center">
+        <ul class="pagination">
+          <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.audit_logs', page=pagination.prev_num, action=action_filter) }}">Previous</a>
+          </li>
+          {% for p in pagination.iter_pages() %}
+            {% if p %}
+              <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('admin.audit_logs', page=p, action=action_filter) }}">{{ p }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+          <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.audit_logs', page=pagination.next_num, action=action_filter) }}">Next</a>
+          </li>
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <div class="cc-empty-state my-4">
+      <i class="bi bi-journal-x cc-empty-icon"></i>
+      <h4 class="fw-bold">No Audit Logs Found</h4>
+      <p class="text-muted small">No audit log records match the search filter.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

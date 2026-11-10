@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}My Claims — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-0">My Submitted Claims</h2>
+      <p class="text-muted small mb-0">Track the review status and recovery decisions on items you have claimed</p>
+    </div>
+    <a href="{{ url_for('items.found_items') }}" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-search me-1"></i> Browse Found Items
+    </a>
+  </div>
+
+  {% if claims %}
+    <div class="row g-4">
+      {% for claim in claims %}
+        <div class="col-lg-6">
+          <div class="card h-100 shadow-sm border-0 rounded-4 bg-white p-4">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+              <div>
+                <span class="badge {% if claim.item.is_lost %}badge-lost{% else %}badge-found{% endif %} me-1">
+                  {{ claim.item.item_type }}
+                </span>
+                <span class="small text-muted">{{ claim.item.category.name if claim.item.category else 'General' }}</span>
+                <h5 class="fw-bold mt-1 mb-0">
+                  <a href="{{ url_for('items.item_details', item_id=claim.item.id) }}" class="text-dark text-decoration-none">
+                    {{ claim.item.title }}
+                  </a>
+                </h5>
+              </div>
+
+              <div>
+                {% if claim.status == 'PENDING' %}
+                  <span class="badge badge-pending px-3 py-1">Pending Review</span>
+                {% elif claim.status == 'APPROVED' %}
+                  <span class="badge badge-returned px-3 py-1"><i class="bi bi-check-circle-fill me-1"></i> Approved</span>
+                {% elif claim.status == 'REJECTED' %}
+                  <span class="badge badge-flagged px-3 py-1">Rejected</span>
+                {% elif claim.status == 'CANCELLED' %}
+                  <span class="badge bg-secondary px-3 py-1">Cancelled</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="p-3 bg-light rounded-3 mb-3">
+              <div class="small fw-semibold text-muted mb-1">Your Claim Summary:</div>
+              <p class="small text-dark mb-0">{{ claim.claim_description }}</p>
+            </div>
+
+            {% if claim.proof_image %}
+              <div class="mb-3">
+                <span class="small fw-semibold text-muted d-block mb-1">Attached Proof:</span>
+                <a href="{{ url_for('static', filename='uploads/' + claim.proof_image) }}" target="_blank" class="small text-primary text-decoration-none">
+                  <i class="bi bi-image me-1"></i> View Uploaded Proof File
+                </a>
+              </div>
+            {% endif %}
+
+            {% if claim.status == 'APPROVED' %}
+              <div class="alert alert-success py-2 px-3 small mb-3">
+                <i class="bi bi-check-circle-fill me-1"></i> <strong>Claim Approved!</strong><br>
+                {{ claim.review_remarks or 'The item reporter accepted your claim. Contact the reporter or check the campus security center to collect your belongings.' }}
+              </div>
+            {% elif claim.status == 'REJECTED' %}
+              <div class="alert alert-danger py-2 px-3 small mb-3">
+                <i class="bi bi-x-circle-fill me-1"></i> <strong>Claim Declined:</strong><br>
+                {{ claim.review_remarks or 'The details provided did not sufficiently match the verified proof of the item.' }}
+              </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top small text-muted">
+              <div><i class="bi bi-clock me-1"></i> Submitted {{ claim.created_at.strftime('%b %d, %Y') }}</div>
+              
+              {% if claim.status == 'PENDING' %}
+                <form action="{{ url_for('claims.cancel_claim', claim_id=claim.id) }}" method="POST" class="d-inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-outline-danger btn-sm" data-confirm="Cancel this claim request?">
+                    <i class="bi bi-x-circle me-1"></i> Cancel Claim
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="cc-empty-state my-4">
+      <i class="bi bi-file-earmark-check cc-empty-icon"></i>
+      <h4 class="fw-bold">No Claims Submitted</h4>
+      <p class="text-muted small mb-3">If you spot your missing belonging under Found Items, submit a claim with verification proof.</p>
+      <a href="{{ url_for('items.found_items') }}" class="btn btn-primary-cc btn-sm">Explore Found Items</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

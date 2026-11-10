@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Report Lost Item — CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ url_for('items.lost_items') }}">Lost Items</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Report Lost Item</li>
+        </ol>
+      </nav>
+
+      <div class="card p-4 p-md-5 shadow-lg border-0 rounded-4 bg-white">
+        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+          <div class="cc-stat-icon rose"><i class="bi bi-exclamation-octagon fs-3"></i></div>
+          <div>
+            <span class="badge badge-lost px-2 py-1 mb-1">Lost Belonging Form</span>
+            <h3 class="fw-bold mb-0">Report a Lost Item</h3>
+            <p class="text-muted small mb-0">Provide accurate details to help campus members recognize and return your item</p>
+          </div>
+        </div>
+
+        <div class="alert alert-info py-2 px-3 small mb-4 d-flex align-items-center gap-2">
+          <i class="bi bi-broadcast fs-5 text-primary"></i>
+          <div>
+            <strong>Campus Alert Notification:</strong> When you report this lost item, an alert notification will be automatically broadcasted to all active student portal accounts so anyone who finds it can help recover it promptly.
+          </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('items.report_lost') }}" enctype="multipart/form-data">
+          {{ form.hidden_tag() }}
+          <!-- Anti-Bot Honeypot Trap Field -->
+          <input type="text" name="cc_website_hp" class="cc-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+          <div class="row g-3">
+            <div class="col-md-12">
+              <label class="form-label small fw-semibold text-muted">{{ form.title.label }} <span class="text-danger">*</span></label>
+              {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), placeholder="e.g. Space Gray 13-inch MacBook Air") }}
+              {% for error in form.title.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.category_id.label }} <span class="text-danger">*</span></label>
+              {{ form.category_id(class="form-select" + (" is-invalid" if form.category_id.errors else "")) }}
+              {% for error in form.category_id.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.location.label }} <span class="text-danger">*</span></label>
+              {{ form.location(class="form-control" + (" is-invalid" if form.location.errors else ""), placeholder="e.g. Science Library, 2nd Floor Study Room 204") }}
+              {% for error in form.location.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.incident_date.label }} <span class="text-danger">*</span></label>
+              {{ form.incident_date(class="form-control" + (" is-invalid" if form.incident_date.errors else ""), type="date") }}
+              {% for error in form.incident_date.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.incident_time.label }}</label>
+              {{ form.incident_time(class="form-control" + (" is-invalid" if form.incident_time.errors else ""), type="time") }}
+              {% for error in form.incident_time.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label small fw-semibold text-muted">{{ form.description.label }} <span class="text-danger">*</span></label>
+              {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="4", placeholder="Describe the physical appearance, color, brand, condition, and any contents...") }}
+              {% for error in form.description.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label small fw-semibold text-muted">{{ form.identifying_features.label }}</label>
+              {{ form.identifying_features(class="form-control" + (" is-invalid" if form.identifying_features.errors else ""), rows="3", placeholder="Private details only you know (e.g. exact scratches, lock screen photo, internal engravings, serial numbers).") }}
+              <div class="form-text small">This information is hidden from public view and only accessible to moderators when verifying claims.</div>
+              {% for error in form.identifying_features.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.contact_preference.label }}</label>
+              {{ form.contact_preference(class="form-select") }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">{{ form.image.label }}</label>
+              {{ form.image(class="form-control" + (" is-invalid" if form.image.errors else ""), accept="image/png,image/jpeg,image/webp") }}
+              <div class="form-text small">Upload clear photo (JPG, PNG, WEBP, max 5MB).</div>
+              <div id="image-preview"></div>
+              {% for error in form.image.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-12 mt-4">
+              <button type="submit" class="btn btn-danger w-100 py-2 fs-6 shadow-sm">
+                <i class="bi bi-broadcast me-1"></i> Publish Lost Item Report
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
